@@ -92,6 +92,9 @@ export abstract class CommontExtensionManagementService extends Disposable imple
 	}
 
 	protected async isExtensionPlatformCompatible(extension: IGalleryExtension): Promise<boolean> {
+		if ((globalThis as any).__SIDEX_TAURI__ === true) {
+			return true;
+		}
 		const currentTargetPlatform = await this.getTargetPlatform();
 		return extension.allTargetPlatforms.some(targetPlatform => isTargetPlatformCompatible(targetPlatform, extension.allTargetPlatforms, currentTargetPlatform));
 	}
@@ -684,8 +687,12 @@ export abstract class AbstractExtensionManagementService extends CommontExtensio
 
 		else {
 			if (await this.canInstall(extension) !== true) {
-				const targetPlatform = await this.getTargetPlatform();
-				throw new ExtensionManagementError(nls.localize('incompatible platform', "The '{0}' extension is not available in {1} for the {2} platform.", extension.identifier.id, this.productService.nameLong, TargetPlatformToString(targetPlatform)), ExtensionManagementErrorCode.IncompatibleTargetPlatform);
+				if ((globalThis as any).__SIDEX_TAURI__ === true) {
+					// SideX has a Node.js extension host — skip platform compatibility check
+				} else {
+					const targetPlatform = await this.getTargetPlatform();
+					throw new ExtensionManagementError(nls.localize('incompatible platform', "The '{0}' extension is not available in {1} for the {2} platform.", extension.identifier.id, this.productService.nameLong, TargetPlatformToString(targetPlatform)), ExtensionManagementErrorCode.IncompatibleTargetPlatform);
+				}
 			}
 
 			compatibleExtension = await this.getCompatibleVersion(extension, sameVersion, installPreRelease, productVersion);
@@ -733,6 +740,10 @@ export abstract class AbstractExtensionManagementService extends CommontExtensio
 			} else {
 				compatibleExtension = await this.galleryService.getCompatibleExtension(extension, includePreRelease, targetPlatform, productVersion);
 			}
+		}
+
+		if (!compatibleExtension && (globalThis as any).__SIDEX_TAURI__ === true) {
+			compatibleExtension = extension;
 		}
 
 		return compatibleExtension;

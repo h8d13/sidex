@@ -390,6 +390,9 @@ export class ExtensionManagementService extends CommontExtensionManagementServic
 	}
 
 	private async canInstallGalleryExtension(gallery: IGalleryExtension): Promise<true | IMarkdownString> {
+		if ((globalThis as any).__SIDEX_TAURI__ === true) {
+			return true;
+		}
 		if (this.extensionManagementServerService.localExtensionManagementServer
 			&& await this.extensionManagementServerService.localExtensionManagementServer.extensionManagementService.canInstall(gallery) === true) {
 			return true;
@@ -412,6 +415,9 @@ export class ExtensionManagementService extends CommontExtensionManagementServic
 	}
 
 	private async canInstallResourceExtension(extension: IResourceExtension): Promise<true | IMarkdownString> {
+		if ((globalThis as any).__SIDEX_TAURI__ === true) {
+			return true;
+		}
 		if (this.extensionManagementServerService.localExtensionManagementServer) {
 			return true;
 		}
@@ -573,7 +579,7 @@ export class ExtensionManagementService extends CommontExtensionManagementServic
 	}
 
 	async installResourceExtension(extension: IResourceExtension, installOptions: InstallOptions): Promise<ILocalExtension> {
-		if (!this.canInstallResourceExtension(extension)) {
+		if (!((globalThis as any).__SIDEX_TAURI__ === true) && !this.canInstallResourceExtension(extension)) {
 			throw new Error('This extension cannot be installed in the current workspace.');
 		}
 		if (!installOptions.isWorkspaceScoped) {
@@ -674,6 +680,9 @@ export class ExtensionManagementService extends CommontExtensionManagementServic
 	}
 
 	private validServers(gallery: IGalleryExtension, manifest: IExtensionManifest, servers: IExtensionManagementServer[]): IExtensionManagementServer[] {
+		if ((globalThis as any).__SIDEX_TAURI__ === true) {
+			return servers;
+		}
 		const installableServers = this.getInstallableExtensionManagementServers(manifest);
 		for (const server of servers) {
 			if (!installableServers.includes(server)) {
@@ -701,9 +710,20 @@ export class ExtensionManagementService extends CommontExtensionManagementServic
 		}
 
 		if (!servers.length) {
-			const error = new Error(localize('cannot be installed', "Cannot install the '{0}' extension because it is not available in this setup.", gallery.displayName || gallery.name));
-			error.name = ExtensionManagementErrorCode.Unsupported;
-			throw error;
+			if ((globalThis as any).__SIDEX_TAURI__ === true) {
+				if (this.extensionManagementServerService.localExtensionManagementServer) {
+					servers.push(this.extensionManagementServerService.localExtensionManagementServer);
+				} else if (this.extensionManagementServerService.remoteExtensionManagementServer) {
+					servers.push(this.extensionManagementServerService.remoteExtensionManagementServer);
+				} else if (this.extensionManagementServerService.webExtensionManagementServer) {
+					servers.push(this.extensionManagementServerService.webExtensionManagementServer);
+				}
+			}
+			if (!servers.length) {
+				const error = new Error(localize('cannot be installed', "Cannot install the '{0}' extension because it is not available in this setup.", gallery.displayName || gallery.name));
+				error.name = ExtensionManagementErrorCode.Unsupported;
+				throw error;
+			}
 		}
 
 		return servers;
@@ -1044,11 +1064,7 @@ export class ExtensionManagementService extends CommontExtensionManagementServic
 				}
 			}
 			if (nonWebExtensions.length && nonWebExtensions.length === extensions.length) {
-				if ((globalThis as any).__SIDEX_TAURI__ === true) {
-					// SideX has a Node.js extension host — allow non-web extensions
-				} else {
-					throw new ExtensionManagementError('Not supported in Web', ExtensionManagementErrorCode.Unsupported);
-				}
+				throw new ExtensionManagementError('Not supported in Web', ExtensionManagementErrorCode.Unsupported);
 			}
 		}
 
