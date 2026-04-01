@@ -587,20 +587,16 @@ class TauriGitSCMProvider extends Disposable implements ISCMProvider {
 		let status: TauriGitStatus | undefined;
 		try {
 			status = await invokeGit<TauriGitStatus>('git_status', { path: rootPath });
-			console.log('[TauriGit] git_status result:', status);
 		} catch (err) {
-			console.error('[TauriGit] git_status failed:', err);
 			this.logService.warn('[TauriGit] git_status failed', err);
 			return;
 		}
 
 		if (!status) {
-			console.log('[TauriGit] No status returned');
 			return;
 		}
 
 		this._branch = status.branch;
-		console.log('[TauriGit] Branch:', this._branch, 'Changes:', status.changes.length);
 
 		if (this._historyProviderInstance) {
 			try {
@@ -626,10 +622,6 @@ class TauriGitSCMProvider extends Disposable implements ISCMProvider {
 
 		this._stagedGroup.setResources(stagedResources);
 		this._changesGroup.setResources(changesResources);
-
-		// Fire provider-level change events so the SCM view updates
-		this._onDidChangeResources.fire();
-		this._onDidChangeResourceGroups.fire();
 
 		const total = stagedResources.length + changesResources.length;
 		this._count.set(total, undefined);
@@ -660,6 +652,7 @@ class TauriGitContribution extends Disposable implements IWorkbenchContribution 
 	static readonly ID = 'workbench.contrib.tauriGit';
 
 	private _pollHandle: ReturnType<typeof setInterval> | undefined;
+	private _refreshInProgress = false;
 
 	constructor(
 		@ISCMService private readonly scmService: ISCMService,
@@ -675,34 +668,27 @@ class TauriGitContribution extends Disposable implements IWorkbenchContribution 
 	}
 
 	private async _init(): Promise<void> {
-		console.log('[TauriGit] _init started');
 		const folders = this.workspaceContextService.getWorkspace().folders;
-		console.log('[TauriGit] Workspace folders:', folders.length, folders.map(f => f.uri.toString()));
 
 		// Store folders globally for git.init command
 		(window as any).__sidex_workspaceFolders = folders.map(f => f.uri.fsPath);
 
 		if (folders.length === 0) {
-			console.log('[TauriGit] No workspace folders, skipping');
 			return;
 		}
 
 		const rootUri = folders[0].uri;
 		const rootPath = rootUri.fsPath;
-		console.log('[TauriGit] Checking if git repo:', rootPath);
 
 		let isRepo: boolean | undefined;
 		try {
 			isRepo = await invokeGit<boolean>('git_is_repo', { path: rootPath });
-			console.log('[TauriGit] git_is_repo result:', isRepo);
 		} catch (err) {
-			console.error('[TauriGit] git_is_repo failed:', err);
 			this.logService.info('[TauriGit] git_is_repo unavailable — Tauri backend not present', err);
 			return;
 		}
 
 		if (!isRepo) {
-			console.log('[TauriGit] Not a git repo, skipping');
 			return;
 		}
 
@@ -738,7 +724,13 @@ class TauriGitContribution extends Disposable implements IWorkbenchContribution 
 
 		await provider.refresh();
 
-		this._pollHandle = setInterval(() => provider.refresh(), 3000);
+		this._pollHandle = setInterval(() => {
+			if (this._refreshInProgress) {
+				return;
+			}
+			this._refreshInProgress = true;
+			provider.refresh().finally(() => { this._refreshInProgress = false; });
+		}, 5000);
 		this._register({
 			dispose: () => {
 				if (this._pollHandle !== undefined) {

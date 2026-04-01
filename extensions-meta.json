@@ -11,9 +11,6 @@
       "engines": {
         "vscode": "^1.52.0"
       },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin mmims/language-batchfile grammars/batchfile.cson ./syntaxes/batchfile.tmLanguage.json"
-      },
       "categories": [
         "Programming Languages"
       ],
@@ -45,10 +42,6 @@
             "path": "./snippets/batchfile.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -67,9 +60,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin atom/language-clojure grammars/clojure.cson ./syntaxes/clojure.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -105,10 +95,6 @@
             "diffEditor.ignoreTrimWhitespace": false
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -127,9 +113,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin atom/language-coffee-script grammars/coffeescript.cson ./syntaxes/coffeescript.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -175,10 +158,6 @@
             "editor.defaultColorDecorators": "never"
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -197,37 +176,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "^1.0.0"
-      },
-      "icon": "images/icon.png",
-      "activationEvents": [
-        "onProfile",
-        "onProfile:github",
-        "onLanguage:json",
-        "onLanguage:jsonc"
-      ],
-      "enabledApiProposals": [
-        "profileContentHandlers"
-      ],
-      "scripts": {
-        "compile": "gulp compile-extension:configuration-editing",
-        "watch": "gulp watch-extension:configuration-editing",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit --watch"
-      },
-      "dependencies": {
-        "@octokit/rest": "^21.1.1",
-        "jsonc-parser": "^3.2.0",
-        "tunnel": "^0.0.6"
-      },
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
       },
       "contributes": {
         "languages": [
@@ -366,12 +314,21 @@
           }
         ]
       },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onProfile",
+        "onProfile:github",
+        "onLanguage:json",
+        "onLanguage:jsonc"
+      ],
+      "icon": "images/icon.png",
+      "enabledApiProposals": [
+        "profileContentHandlers"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -390,9 +347,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammars.js"
       },
       "categories": [
         "Programming Languages"
@@ -514,10 +468,6 @@
             "path": "./snippets/cpp.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -536,9 +486,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin dotnet/csharp-tmLanguage grammars/csharp.tmLanguage ./syntaxes/csharp.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -587,10 +534,6 @@
             "path": "./snippets/csharp.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -609,9 +552,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin microsoft/vscode-css grammars/css.cson ./syntaxes/css.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -643,10 +583,6 @@
             }
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -665,25 +601,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "^1.77.0"
-      },
-      "icon": "icons/css.png",
-      "activationEvents": [
-        "onLanguage:css",
-        "onLanguage:less",
-        "onLanguage:scss",
-        "onCommand:_css.applyCodeAction"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "scripts": {
-        "compile": "npx gulp compile-extension:css-language-features-client compile-extension:css-language-features-server",
-        "watch": "npx gulp watch-extension:css-language-features-client watch-extension:css-language-features-server",
-        "test": "node ../../node_modules/mocha/bin/mocha",
-        "install-client-next": "npm install vscode-languageclient@next"
       },
       "categories": [
         "Programming Languages"
@@ -1649,16 +1566,18 @@
           }
         ]
       },
-      "dependencies": {
-        "vscode-languageclient": "^10.0.0-next.20",
-        "vscode-uri": "^3.1.0"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:css",
+        "onLanguage:less",
+        "onLanguage:scss",
+        "onCommand:_css.applyCodeAction"
+      ],
+      "icon": "icons/css.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -1785,9 +1704,6 @@
       "engines": {
         "vscode": "0.10.x"
       },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin dart-lang/dart-syntax-highlight grammars/dart.json ./syntaxes/dart.tmLanguage.json"
-      },
       "categories": [
         "Programming Languages"
       ],
@@ -1830,20 +1746,6 @@
       "engines": {
         "vscode": "^1.5.0"
       },
-      "icon": "media/icon.png",
-      "capabilities": {
-        "virtualWorkspaces": false,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "activationEvents": [
-        "onStartupFinished"
-      ],
-      "scripts": {
-        "compile": "gulp compile-extension:debug-auto-launch",
-        "watch": "gulp watch-extension:debug-auto-launch"
-      },
       "contributes": {
         "commands": [
           {
@@ -1853,18 +1755,15 @@
           }
         ]
       },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "prettier": {
-        "printWidth": 100,
-        "trailingComma": "all",
-        "singleQuote": true,
-        "arrowParens": "avoid"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onStartupFinished"
+      ],
+      "icon": "media/icon.png",
+      "capabilities": {
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -1884,23 +1783,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "^1.32.0"
-      },
-      "icon": "media/icon.png",
-      "activationEvents": [
-        "onDebugResolve"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": false,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "enabledApiProposals": [
-        "terminalDataWriteEvent"
-      ],
-      "scripts": {
-        "compile": "gulp compile-extension:debug-server-ready",
-        "watch": "gulp watch-extension:debug-server-ready"
       },
       "contributes": {
         "debuggers": [
@@ -2087,12 +1969,18 @@
           }
         ]
       },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onDebugResolve"
+      ],
+      "icon": "media/icon.png",
+      "enabledApiProposals": [
+        "terminalDataWriteEvent"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -2122,9 +2010,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/diff.tmbundle Syntaxes/Diff.plist ./syntaxes/diff.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -2171,7 +2056,6 @@
       "engines": {
         "vscode": "*"
       },
-      "scripts": {},
       "categories": [
         "Programming Languages"
       ],
@@ -2213,10 +2097,6 @@
             }
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -2235,9 +2115,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin dotenv-org/dotenv-vscode syntaxes/dotenv.tmLanguage.json ./syntaxes/dotenv.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -2270,10 +2147,6 @@
             "path": "./syntaxes/dotenv.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -2293,17 +2166,8 @@
       "engines": {
         "vscode": "^1.13.0"
       },
-      "icon": "images/icon.png",
       "categories": [
         "Other"
-      ],
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
-      },
-      "activationEvents": [
-        "onCommand:emmet.expandAbbreviation",
-        "onLanguage"
       ],
       "contributes": {
         "configuration": {
@@ -2756,28 +2620,11 @@
           ]
         }
       },
-      "scripts": {
-        "compile": "gulp compile-extension:emmet",
-        "watch": "gulp watch-extension:emmet",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit --watch",
-        "deps": "npm install @vscode/emmet-helper"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "dependencies": {
-        "@emmetio/css-parser": "ramya-rao-a/css-parser#vscode",
-        "@emmetio/html-matcher": "^0.3.3",
-        "@emmetio/math-expression": "^1.0.5",
-        "@vscode/emmet-helper": "^2.8.8",
-        "image-size": "~1.0.0",
-        "vscode-languageserver-textdocument": "^1.0.1"
-      },
+      "activationEvents": [
+        "onCommand:emmet.expandAbbreviation",
+        "onLanguage"
+      ],
+      "icon": "images/icon.png",
       "capabilities": {
         "virtualWorkspaces": true,
         "untrustedWorkspaces": {
@@ -2862,26 +2709,6 @@
       "engines": {
         "vscode": "^1.4.0"
       },
-      "icon": "images/icon.png",
-      "activationEvents": [
-        "onLanguage:json",
-        "onLanguage:markdown"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "scripts": {
-        "compile": "gulp compile-extension:extension-editing",
-        "watch": "gulp watch-extension:extension-editing"
-      },
-      "dependencies": {
-        "jsonc-parser": "^3.2.0",
-        "markdown-it": "^12.3.2",
-        "parse5": "^3.0.2"
-      },
       "contributes": {
         "jsonValidation": [
           {
@@ -2917,13 +2744,16 @@
           }
         ]
       },
-      "devDependencies": {
-        "@types/markdown-it": "^14",
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:json",
+        "onLanguage:markdown"
+      ],
+      "icon": "images/icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -2942,9 +2772,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin ionide/ionide-fsgrammar grammars/fsharp.json ./syntaxes/fsharp.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -2985,10 +2812,6 @@
             "diffEditor.ignoreTrimWhitespace": false
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -3002,74 +2825,15 @@
       "name": "git",
       "displayName": "%displayName%",
       "description": "%description%",
+      "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
-      "version": "10.0.0",
       "engines": {
         "vscode": "^1.5.0"
       },
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
-      "enabledApiProposals": [
-        "agentSessionsWorkspace",
-        "canonicalUriProvider",
-        "contribEditSessions",
-        "contribEditorContentMenu",
-        "contribMergeEditorMenus",
-        "contribMultiDiffEditorMenus",
-        "contribDiffEditorGutterToolBarMenus",
-        "contribSourceControlArtifactGroupMenu",
-        "contribSourceControlArtifactMenu",
-        "contribSourceControlHistoryItemMenu",
-        "contribSourceControlHistoryTitleMenu",
-        "contribSourceControlInputBoxMenu",
-        "contribSourceControlTitleMenu",
-        "contribViewsWelcome",
-        "editSessionIdentityProvider",
-        "envIsConnectionMetered",
-        "findFiles2",
-        "quickDiffProvider",
-        "quickPickSortByLabel",
-        "scmActionButton",
-        "scmArtifactProvider",
-        "scmHistoryProvider",
-        "scmMultiDiffEditor",
-        "scmProviderOptions",
-        "scmSelectedProvider",
-        "scmTextDocument",
-        "scmValidation",
-        "statusBarItemTooltip",
-        "taskRunOptions",
-        "tabInputMultiDiff",
-        "tabInputTextMerge",
-        "textEditorDiffInformation",
-        "timeline",
-        "workspaceTrust"
-      ],
       "categories": [
         "Other"
       ],
-      "activationEvents": [
-        "*",
-        "onEditSession:file",
-        "onFileSystem:git",
-        "onFileSystem:git-show"
-      ],
-      "extensionDependencies": [
-        "vscode.git-base"
-      ],
-      "icon": "resources/icons/git.png",
-      "scripts": {
-        "compile": "gulp compile-extension:git",
-        "watch": "gulp watch-extension:git",
-        "update-emoji": "node ./build/update-emoji.js",
-        "test": "node ../../node_modules/mocha/bin/mocha"
-      },
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": false
-        }
-      },
       "contributes": {
         "commands": [
           {
@@ -7343,26 +7107,57 @@
           }
         ]
       },
-      "dependencies": {
-        "@joaomoreno/unique-names-generator": "^5.2.0",
-        "@vscode/extension-telemetry": "^0.9.8",
-        "@vscode/fs-copyfile": "2.0.0",
-        "byline": "^5.0.0",
-        "file-type": "21.3.2",
-        "picomatch": "2.3.2",
-        "vscode-uri": "^2.0.0",
-        "which": "4.0.0"
-      },
-      "devDependencies": {
-        "@types/byline": "4.2.31",
-        "@types/mocha": "^10.0.10",
-        "@types/node": "22.x",
-        "@types/picomatch": "2.3.0",
-        "@types/which": "3.0.0"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "*",
+        "onEditSession:file",
+        "onFileSystem:git",
+        "onFileSystem:git-show"
+      ],
+      "extensionDependencies": [
+        "vscode.git-base"
+      ],
+      "icon": "resources/icons/git.png",
+      "enabledApiProposals": [
+        "agentSessionsWorkspace",
+        "canonicalUriProvider",
+        "contribEditSessions",
+        "contribEditorContentMenu",
+        "contribMergeEditorMenus",
+        "contribMultiDiffEditorMenus",
+        "contribDiffEditorGutterToolBarMenus",
+        "contribSourceControlArtifactGroupMenu",
+        "contribSourceControlArtifactMenu",
+        "contribSourceControlHistoryItemMenu",
+        "contribSourceControlHistoryTitleMenu",
+        "contribSourceControlInputBoxMenu",
+        "contribSourceControlTitleMenu",
+        "contribViewsWelcome",
+        "editSessionIdentityProvider",
+        "envIsConnectionMetered",
+        "findFiles2",
+        "quickDiffProvider",
+        "quickPickSortByLabel",
+        "scmActionButton",
+        "scmArtifactProvider",
+        "scmHistoryProvider",
+        "scmMultiDiffEditor",
+        "scmProviderOptions",
+        "scmSelectedProvider",
+        "scmTextDocument",
+        "scmValidation",
+        "statusBarItemTooltip",
+        "taskRunOptions",
+        "tabInputMultiDiff",
+        "tabInputTextMerge",
+        "textEditorDiffInformation",
+        "timeline",
+        "workspaceTrust"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": false
+        }
       }
     },
     "packageNLS": {
@@ -7876,21 +7671,6 @@
       "categories": [
         "Other"
       ],
-      "activationEvents": [
-        "*"
-      ],
-      "icon": "resources/icons/git.png",
-      "scripts": {
-        "compile": "gulp compile-extension:git-base",
-        "watch": "gulp watch-extension:git-base",
-        "update-grammar": "node ./build/update-grammars.js"
-      },
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
       "contributes": {
         "commands": [
           {
@@ -7966,12 +7746,15 @@
           }
         ]
       },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "*"
+      ],
+      "icon": "resources/icons/git.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -7986,39 +7769,14 @@
       "name": "github",
       "displayName": "%displayName%",
       "description": "%description%",
+      "version": "0.0.1",
       "publisher": "vscode",
       "license": "MIT",
-      "version": "0.0.1",
       "engines": {
         "vscode": "^1.41.0"
       },
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
-      "icon": "images/icon.png",
       "categories": [
         "Other"
-      ],
-      "activationEvents": [
-        "*"
-      ],
-      "extensionDependencies": [
-        "vscode.git-base"
-      ],
-      "type": "module",
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "enabledApiProposals": [
-        "canonicalUriProvider",
-        "chatSessionsProvider",
-        "contribEditSessions",
-        "contribShareMenu",
-        "contribSourceControlHistoryItemMenu",
-        "scmHistoryProvider",
-        "shareProvider",
-        "timeline"
       ],
       "contributes": {
         "commands": [
@@ -8218,24 +7976,28 @@
           "./markdown.css"
         ]
       },
-      "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "gulp compile-extension:github",
-        "watch": "gulp watch-extension:github"
-      },
-      "dependencies": {
-        "@octokit/graphql": "8.2.0",
-        "@octokit/graphql-schema": "14.4.0",
-        "@octokit/rest": "21.1.0",
-        "tunnel": "^0.0.6",
-        "@vscode/extension-telemetry": "^1.0.0"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "*"
+      ],
+      "extensionDependencies": [
+        "vscode.git-base"
+      ],
+      "icon": "images/icon.png",
+      "enabledApiProposals": [
+        "canonicalUriProvider",
+        "chatSessionsProvider",
+        "contribEditSessions",
+        "contribShareMenu",
+        "contribSourceControlHistoryItemMenu",
+        "scmHistoryProvider",
+        "shareProvider",
+        "timeline"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -8285,9 +8047,6 @@
       "engines": {
         "vscode": "*"
       },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin worlpaker/go-syntax syntaxes/go.tmLanguage.json ./syntaxes/go.tmLanguage.json"
-      },
       "categories": [
         "Programming Languages"
       ],
@@ -8316,10 +8075,6 @@
             "editor.insertSpaces": false
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -8338,9 +8093,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/groovy.tmbundle Syntaxes/Groovy.tmLanguage ./syntaxes/groovy.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -8383,10 +8135,6 @@
             "path": "./snippets/groovy.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -8398,12 +8146,10 @@
     "extensionPath": "grunt",
     "packageJSON": {
       "name": "grunt",
-      "publisher": "vscode",
-      "description": "Extension to add Grunt capabilities to VS Code.",
       "displayName": "Grunt support for VS Code",
+      "description": "Extension to add Grunt capabilities to VS Code.",
       "version": "10.0.0",
-      "private": true,
-      "icon": "images/grunt.png",
+      "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "*"
@@ -8411,23 +8157,6 @@
       "categories": [
         "Other"
       ],
-      "scripts": {
-        "compile": "gulp compile-extension:grunt",
-        "watch": "gulp watch-extension:grunt"
-      },
-      "dependencies": {},
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "activationEvents": [
-        "onTaskType:grunt"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": false,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
       "contributes": {
         "configuration": {
           "id": "grunt",
@@ -8470,9 +8199,15 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onTaskType:grunt"
+      ],
+      "icon": "images/grunt.png",
+      "capabilities": {
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -8488,11 +8223,10 @@
     "extensionPath": "gulp",
     "packageJSON": {
       "name": "gulp",
-      "publisher": "vscode",
-      "description": "%description%",
       "displayName": "%displayName%",
+      "description": "%description%",
       "version": "10.0.0",
-      "icon": "images/gulp.png",
+      "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "*"
@@ -8500,23 +8234,6 @@
       "categories": [
         "Other"
       ],
-      "scripts": {
-        "compile": "gulp compile-extension:gulp",
-        "watch": "gulp watch-extension:gulp"
-      },
-      "dependencies": {},
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "activationEvents": [
-        "onTaskType:gulp"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": false,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
       "contributes": {
         "configuration": {
           "id": "gulp",
@@ -8555,9 +8272,15 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onTaskType:gulp"
+      ],
+      "icon": "images/gulp.png",
+      "capabilities": {
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -8580,15 +8303,8 @@
       "engines": {
         "vscode": "0.10.x"
       },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin daaain/Handlebars grammars/Handlebars.json ./syntaxes/Handlebars.tmLanguage.json"
-      },
       "categories": [
         "Programming Languages"
-      ],
-      "extensionKind": [
-        "ui",
-        "workspace"
       ],
       "contributes": {
         "languages": [
@@ -8623,10 +8339,10 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
-      }
+      "extensionKind": [
+        "ui",
+        "workspace"
+      ]
     },
     "packageNLS": {
       "displayName": "Handlebars Language Basics",
@@ -8644,9 +8360,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin tgjones/shaders-tmLanguage grammars/hlsl.json ./syntaxes/hlsl.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -8679,10 +8392,6 @@
             "scopeName": "source.hlsl"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -8701,9 +8410,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.mjs"
       },
       "categories": [
         "Programming Languages"
@@ -8780,10 +8486,6 @@
             "path": "./snippets/html.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -8800,28 +8502,8 @@
       "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.77.0"
-      },
-      "icon": "icons/html.png",
-      "activationEvents": [
-        "onLanguage:html",
-        "onLanguage:handlebars"
-      ],
-      "enabledApiProposals": [
-        "extensionsAny"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "scripts": {
-        "compile": "npx gulp compile-extension:html-language-features-client compile-extension:html-language-features-server",
-        "watch": "npx gulp watch-extension:html-language-features-client watch-extension:html-language-features-server",
-        "install-client-next": "npm install vscode-languageclient@next"
       },
       "categories": [
         "Programming Languages"
@@ -9056,17 +8738,19 @@
           }
         ]
       },
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8",
-        "vscode-languageclient": "^10.0.0-next.10",
-        "vscode-uri": "^3.1.0"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:html",
+        "onLanguage:handlebars"
+      ],
+      "icon": "icons/html.png",
+      "enabledApiProposals": [
+        "extensionsAny"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -9117,14 +8801,10 @@
       "displayName": "%displayName%",
       "description": "%description%",
       "version": "10.0.0",
-      "private": true,
       "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/ini.tmbundle Syntaxes/Ini.plist ./syntaxes/ini.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -9181,10 +8861,6 @@
             "path": "./syntaxes/ini.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -9198,30 +8874,11 @@
       "name": "ipynb",
       "displayName": "%displayName%",
       "description": "%description%",
-      "publisher": "vscode",
       "version": "10.0.0",
+      "publisher": "vscode",
       "license": "MIT",
-      "icon": "media/icon.png",
       "engines": {
         "vscode": "^1.57.0"
-      },
-      "enabledApiProposals": [
-        "diffContentOptions"
-      ],
-      "activationEvents": [
-        "onNotebook:jupyter-notebook",
-        "onNotebookSerializer:interactive",
-        "onNotebookSerializer:repl"
-      ],
-      "extensionKind": [
-        "workspace",
-        "ui"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
       },
       "contributes": {
         "configuration": [
@@ -9349,23 +9006,24 @@
           ]
         }
       },
-      "scripts": {
-        "compile": "npx gulp compile-extension:ipynb && npm run build-notebook",
-        "watch": "npx gulp watch-extension:ipynb",
-        "build-notebook": "node ./esbuild.notebook.mts"
-      },
-      "dependencies": {
-        "@enonic/fnv-plus": "^1.3.0",
-        "detect-indent": "^6.0.0"
-      },
-      "devDependencies": {
-        "@jupyterlab/nbformat": "^3.2.9",
-        "@types/markdown-it": "12.2.3",
-        "@types/node": "^22.18.10"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onNotebook:jupyter-notebook",
+        "onNotebookSerializer:interactive",
+        "onNotebookSerializer:repl"
+      ],
+      "extensionKind": [
+        "workspace",
+        "ui"
+      ],
+      "icon": "media/icon.png",
+      "enabledApiProposals": [
+        "diffContentOptions"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -9392,11 +9050,10 @@
     "extensionPath": "jake",
     "packageJSON": {
       "name": "jake",
-      "publisher": "vscode",
-      "description": "%description%",
       "displayName": "%displayName%",
-      "icon": "images/cowboy_hat.png",
+      "description": "%description%",
       "version": "10.0.0",
+      "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "*"
@@ -9404,23 +9061,6 @@
       "categories": [
         "Other"
       ],
-      "scripts": {
-        "compile": "gulp compile-extension:jake",
-        "watch": "gulp watch-extension:jake"
-      },
-      "dependencies": {},
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "activationEvents": [
-        "onTaskType:jake"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": false,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
       "contributes": {
         "configuration": {
           "id": "jake",
@@ -9459,9 +9099,15 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onTaskType:jake"
+      ],
+      "icon": "images/cowboy_hat.png",
+      "capabilities": {
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -9483,9 +9129,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin redhat-developer/vscode-java language-support/java/java.tmLanguage.json ./syntaxes/java.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -9518,10 +9161,6 @@
             "path": "./snippets/java.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -9704,10 +9343,6 @@
             "path": "./snippets/javascript.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -9726,9 +9361,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammars.js"
       },
       "categories": [
         "Programming Languages"
@@ -9844,10 +9476,6 @@
             "path": "./syntaxes/snippets.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -9864,31 +9492,8 @@
       "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.77.0"
-      },
-      "enabledApiProposals": [
-        "extensionsAny"
-      ],
-      "icon": "icons/json.png",
-      "activationEvents": [
-        "onLanguage:json",
-        "onLanguage:jsonc",
-        "onLanguage:snippets",
-        "onCommand:json.validate"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": "limited",
-          "description": "%json.workspaceTrust%"
-        }
-      },
-      "scripts": {
-        "compile": "npx gulp compile-extension:json-language-features-client compile-extension:json-language-features-server",
-        "watch": "npx gulp watch-extension:json-language-features-client watch-extension:json-language-features-server",
-        "install-client-next": "npm install vscode-languageclient@next"
       },
       "categories": [
         "Programming Languages"
@@ -10044,17 +9649,22 @@
           }
         ]
       },
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8",
-        "request-light": "^0.8.0",
-        "vscode-languageclient": "^10.0.0-next.20"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:json",
+        "onLanguage:jsonc",
+        "onLanguage:snippets",
+        "onCommand:json.validate"
+      ],
+      "icon": "icons/json.png",
+      "enabledApiProposals": [
+        "extensionsAny"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": "limited",
+          "description": "%json.workspaceTrust%"
+        }
       }
     },
     "packageNLS": {
@@ -10093,9 +9703,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin JuliaEditorSupport/atom-language-julia variants/julia_vscode.json ./syntaxes/julia.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -10163,9 +9770,6 @@
       "engines": {
         "vscode": "*"
       },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.js"
-      },
       "categories": [
         "Programming Languages"
       ],
@@ -10210,10 +9814,6 @@
             }
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -10232,9 +9832,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin emilast/vscode-logfile-highlighter syntaxes/log.tmLanguage ./syntaxes/log.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -10259,10 +9856,6 @@
             "path": "./syntaxes/log.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -10281,9 +9874,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin sumneko/lua.tmbundle Syntaxes/Lua.plist ./syntaxes/lua.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -10312,10 +9902,6 @@
             }
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -10334,9 +9920,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin fadeevab/make.tmbundle Syntaxes/Makefile.plist ./syntaxes/make.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -10378,10 +9961,6 @@
             "editor.insertSpaces": false
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -10507,13 +10086,6 @@
             "diffEditor.ignoreTrimWhitespace": false
           }
         }
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin microsoft/vscode-markdown-tm-grammar syntaxes/markdown.tmLanguage ./syntaxes/markdown.tmLanguage.json"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -10528,36 +10100,14 @@
       "displayName": "%displayName%",
       "description": "%description%",
       "version": "10.0.0",
-      "icon": "icon.png",
       "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.70.0"
       },
       "categories": [
         "Programming Languages"
       ],
-      "activationEvents": [
-        "onLanguage:markdown",
-        "onLanguage:prompt",
-        "onLanguage:instructions",
-        "onLanguage:chatagent",
-        "onLanguage:skill",
-        "onCommand:markdown.api.render",
-        "onCommand:markdown.api.reloadPlugins",
-        "onWebviewPanel:markdown.preview"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": "limited",
-          "description": "%workspaceTrust%",
-          "restrictedConfigurations": [
-            "markdown.styles"
-          ]
-        }
-      },
       "contributes": {
         "notebookRenderer": [
           {
@@ -11287,52 +10837,26 @@
           }
         ]
       },
-      "scripts": {
-        "compile": "npm-run-all2 -lp build-ext build-webview build-notebook",
-        "watch": "npm-run-all2 -lp watch-ext watch-webview watch-notebook",
-        "build-ext": "gulp compile-extension:markdown-language-features",
-        "watch-ext": "gulp watch-extension:markdown-language-features",
-        "build-notebook": "node ./esbuild.notebook.mts",
-        "watch-notebook": "node ./esbuild.notebook.mts --watch",
-        "build-webview": "node ./esbuild.webview.mts",
-        "watch-webview": "node ./esbuild.webview.mts --watch",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit --watch"
-      },
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8",
-        "dompurify": "^3.3.2",
-        "highlight.js": "^11.8.0",
-        "markdown-it": "^12.3.2",
-        "markdown-it-front-matter": "^0.2.4",
-        "morphdom": "^2.7.7",
-        "picomatch": "^2.3.2",
-        "punycode": "^2.3.1",
-        "vscode-languageclient": "^8.0.2",
-        "vscode-languageserver-textdocument": "^1.0.11",
-        "vscode-markdown-languageserver": "^0.5.0-alpha.12",
-        "vscode-uri": "^3.0.3"
-      },
-      "devDependencies": {
-        "@types/dompurify": "^3.0.5",
-        "@types/lodash.throttle": "^4.1.9",
-        "@types/markdown-it": "^14.1.2",
-        "@types/node": "22.x",
-        "@types/picomatch": "^2.3.0",
-        "@types/vscode-notebook-renderer": "^1.60.0",
-        "@types/vscode-webview": "^1.57.0",
-        "@vscode/markdown-it-katex": "^1.1.1",
-        "lodash.throttle": "^4.1.1",
-        "vscode-languageserver-types": "^3.17.2",
-        "vscode-markdown-languageservice": "^0.3.0-alpha.3"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:markdown",
+        "onLanguage:prompt",
+        "onLanguage:instructions",
+        "onLanguage:chatagent",
+        "onLanguage:skill",
+        "onCommand:markdown.api.render",
+        "onCommand:markdown.api.reloadPlugins",
+        "onWebviewPanel:markdown.preview"
+      ],
+      "icon": "icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": "limited",
+          "description": "%workspaceTrust%",
+          "restrictedConfigurations": [
+            "markdown.styles"
+          ]
+        }
       }
     },
     "packageNLS": {
@@ -11440,10 +10964,8 @@
       "displayName": "%displayName%",
       "description": "%description%",
       "version": "10.0.0",
-      "icon": "icon.png",
       "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.54.0"
       },
@@ -11451,13 +10973,6 @@
         "Other",
         "Programming Languages"
       ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "activationEvents": [],
       "contributes": {
         "languages": [
           {
@@ -11540,21 +11055,13 @@
           }
         ]
       },
-      "scripts": {
-        "compile": "npm run build-notebook",
-        "watch": "npm run build-notebook",
-        "build-notebook": "node ./esbuild.notebook.mts"
-      },
-      "devDependencies": {
-        "@types/markdown-it": "^0.0.0",
-        "@types/vscode-notebook-renderer": "^1.60.0"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
-      },
-      "dependencies": {
-        "@vscode/markdown-it-katex": "^1.1.2"
+      "activationEvents": [],
+      "icon": "icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -11570,28 +11077,15 @@
       "name": "media-preview",
       "displayName": "%displayName%",
       "description": "%description%",
-      "extensionKind": [
-        "ui",
-        "workspace"
-      ],
       "version": "10.0.0",
       "publisher": "vscode",
-      "icon": "icon.png",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.70.0"
       },
       "categories": [
         "Other"
       ],
-      "activationEvents": [],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
       "contributes": {
         "configuration": {
           "type": "object",
@@ -11717,28 +11211,17 @@
           ]
         }
       },
-      "scripts": {
-        "compile": "gulp compile-extension:media-preview",
-        "watch": "npm run build-preview && gulp watch-extension:media-preview",
-        "vscode:prepublish": "npm run build-ext",
-        "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.mjs compile-extension:media-preview ./tsconfig.json",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit --watch"
-      },
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8",
-        "vscode-uri": "^3.0.6"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [],
+      "extensionKind": [
+        "ui",
+        "workspace"
+      ],
+      "icon": "icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -11760,38 +11243,17 @@
     "extensionPath": "merge-conflict",
     "packageJSON": {
       "name": "merge-conflict",
-      "publisher": "vscode",
       "displayName": "%displayName%",
       "description": "%description%",
-      "icon": "media/icon.png",
       "version": "10.0.0",
+      "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.5.0"
       },
       "categories": [
         "Other"
       ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "activationEvents": [
-        "onStartupFinished"
-      ],
-      "scripts": {
-        "compile": "gulp compile-extension:merge-conflict",
-        "watch": "gulp watch-extension:merge-conflict",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.json --noEmit --watch"
-      },
       "contributes": {
         "commands": [
           {
@@ -11929,15 +11391,15 @@
           }
         }
       },
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onStartupFinished"
+      ],
+      "icon": "media/icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -11970,18 +11432,11 @@
       "name": "builtin-notebook-renderers",
       "displayName": "%displayName%",
       "description": "%description%",
-      "publisher": "vscode",
       "version": "10.0.0",
+      "publisher": "vscode",
       "license": "MIT",
-      "icon": "media/icon.png",
       "engines": {
         "vscode": "^1.57.0"
-      },
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
       },
       "contributes": {
         "notebookRenderer": [
@@ -12009,20 +11464,12 @@
           }
         ]
       },
-      "scripts": {
-        "compile": "npx gulp compile-extension:notebook-renderers && npm run build-notebook",
-        "watch": "npx gulp compile-watch:notebook-renderers",
-        "build-notebook": "node ./esbuild.notebook.mts"
-      },
-      "devDependencies": {
-        "@types/jsdom": "^21.1.0",
-        "@types/node": "^22.18.10",
-        "@types/vscode-notebook-renderer": "^1.60.0",
-        "jsdom": "^28.1.0"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "icon": "media/icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -12034,62 +11481,17 @@
     "extensionPath": "npm",
     "packageJSON": {
       "name": "npm",
-      "publisher": "vscode",
       "displayName": "%displayName%",
       "description": "%description%",
       "version": "1.0.1",
-      "private": true,
+      "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
       },
-      "icon": "images/npm_icon.png",
       "categories": [
         "Other"
       ],
-      "enabledApiProposals": [
-        "terminalQuickFixProvider"
-      ],
-      "scripts": {
-        "compile": "npx gulp compile-extension:npm",
-        "watch": "npx gulp watch-extension:npm",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit --watch"
-      },
-      "dependencies": {
-        "find-up": "^5.0.0",
-        "find-yarn-workspace-root": "^2.0.0",
-        "jsonc-parser": "^3.2.0",
-        "minimatch": "^5.1.8",
-        "request-light": "^0.7.0",
-        "which": "^4.0.0",
-        "which-pm": "^2.1.1",
-        "vscode-uri": "^3.0.8"
-      },
-      "devDependencies": {
-        "@types/minimatch": "^5.1.2",
-        "@types/node": "22.x",
-        "@types/which": "^3.0.0"
-      },
-      "activationEvents": [
-        "onTaskType:npm",
-        "onLanguage:json",
-        "workspaceContains:package.json"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": {
-          "supported": "limited",
-          "description": "%virtualWorkspaces%"
-        },
-        "untrustedWorkspaces": {
-          "supported": "limited",
-          "description": "%workspaceTrust%"
-        }
-      },
       "contributes": {
         "languages": [
           {
@@ -12414,9 +11816,24 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onTaskType:npm",
+        "onLanguage:json",
+        "workspaceContains:package.json"
+      ],
+      "icon": "images/npm_icon.png",
+      "enabledApiProposals": [
+        "terminalQuickFixProvider"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": {
+          "supported": "limited",
+          "description": "%virtualWorkspaces%"
+        },
+        "untrustedWorkspaces": {
+          "supported": "limited",
+          "description": "%workspaceTrust%"
+        }
       }
     },
     "packageNLS": {
@@ -12472,9 +11889,6 @@
       "engines": {
         "vscode": "*"
       },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammars.js"
-      },
       "categories": [
         "Programming Languages"
       ],
@@ -12513,10 +11927,6 @@
             "path": "./syntaxes/objective-c++.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -12535,9 +11945,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/perl.tmbundle Syntaxes/Perl.plist ./syntaxes/perl.tmLanguage.json Syntaxes/Perl%206.tmLanguage ./syntaxes/perl6.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -12597,10 +12004,6 @@
             "path": "./syntaxes/perl6.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -12672,13 +12075,6 @@
             "path": "./snippets/php.code-snippets"
           }
         ]
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.mjs"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -12695,26 +12091,12 @@
       "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
-      "icon": "icons/logo.png",
       "engines": {
         "vscode": "0.10.x"
       },
-      "activationEvents": [
-        "onLanguage:php"
-      ],
       "categories": [
         "Programming Languages"
       ],
-      "capabilities": {
-        "virtualWorkspaces": false,
-        "untrustedWorkspaces": {
-          "supported": "limited",
-          "description": "%workspaceTrust%",
-          "restrictedConfigurations": [
-            "php.validate.executablePath"
-          ]
-        }
-      },
       "contributes": {
         "configuration": {
           "title": "%configuration.title%",
@@ -12758,20 +12140,19 @@
           }
         ]
       },
-      "scripts": {
-        "compile": "npx gulp compile-extension:php-language-features",
-        "watch": "npx gulp watch-extension:php-language-features"
-      },
-      "dependencies": {
-        "which": "^2.0.2"
-      },
-      "devDependencies": {
-        "@types/node": "22.x",
-        "@types/which": "^2.0.0"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:php"
+      ],
+      "icon": "icons/logo.png",
+      "capabilities": {
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+          "supported": "limited",
+          "description": "%workspaceTrust%",
+          "restrictedConfigurations": [
+            "php.validate.executablePath"
+          ]
+        }
       }
     },
     "packageNLS": {
@@ -12831,13 +12212,6 @@
             "path": "./syntaxes/powershell.tmLanguage.json"
           }
         ]
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin PowerShell/EditorSyntax PowerShellSyntax.tmLanguage ./syntaxes/powershell.tmLanguage.json"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -12904,13 +12278,6 @@
             "editor.defaultColorDecorators": "never"
           }
         }
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin MagicStack/MagicPython grammars/MagicPython.tmLanguage ./syntaxes/MagicPython.tmLanguage.json grammars/MagicRegExp.tmLanguage ./syntaxes/MagicRegExp.tmLanguage.json"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -12929,9 +12296,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin REditorSupport/vscode-R-syntax syntaxes/r.json ./syntaxes/r.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -12960,10 +12324,6 @@
             "path": "./syntaxes/r.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -12982,9 +12342,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "0.10.x"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.mjs"
       },
       "categories": [
         "Programming Languages"
@@ -13019,10 +12376,6 @@
             }
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -13036,30 +12389,12 @@
       "name": "references-view",
       "displayName": "%displayName%",
       "description": "%description%",
-      "icon": "media/icon.png",
       "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "^1.67.0"
       },
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/Microsoft/vscode-references-view"
-      },
-      "bugs": {
-        "url": "https://github.com/Microsoft/vscode-references-view/issues"
-      },
-      "activationEvents": [
-        "onCommand:references-view.find",
-        "onCommand:editor.action.showReferences"
-      ],
       "contributes": {
         "configuration": {
           "properties": {
@@ -13426,18 +12761,16 @@
           }
         ]
       },
-      "scripts": {
-        "compile": "npx gulp compile-extension:references-view",
-        "watch": "npx gulp watch-extension:references-view",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.json --noEmit --watch"
-      },
-      "devDependencies": {
-        "@types/node": "22.x"
+      "activationEvents": [
+        "onCommand:references-view.find",
+        "onCommand:editor.action.showReferences"
+      ],
+      "icon": "media/icon.png",
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -13483,9 +12816,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin Shopify/ruby-lsp vscode/grammars/ruby.cson.json ./syntaxes/ruby.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -13550,10 +12880,6 @@
             "editor.defaultColorDecorators": "never"
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -13572,9 +12898,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.mjs"
       },
       "categories": [
         "Programming Languages"
@@ -13600,10 +12923,6 @@
             "scopeName": "source.rust"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -13622,9 +12941,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin atom/language-sass grammars/scss.cson ./syntaxes/scss.tmLanguage.json grammars/sassdoc.cson ./syntaxes/sassdoc.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -13696,10 +13012,6 @@
             ]
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -13716,32 +13028,9 @@
       "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
-      "icon": "images/icon.png",
       "engines": {
         "vscode": "^1.39.0"
       },
-      "activationEvents": [
-        "onLanguage:search-result"
-      ],
-      "scripts": {
-        "generate-grammar": "node ./syntaxes/generateTMLanguage.js",
-        "vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.mjs compile-extension:search-result ./tsconfig.json",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.json --noEmit --watch"
-      },
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
-      "enabledApiProposals": [
-        "documentFiltersExclusive"
-      ],
       "contributes": {
         "configurationDefaults": {
           "[search-result]": {
@@ -13767,12 +13056,18 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
-      },
-      "devDependencies": {
-        "@types/node": "^22.18.10"
+      "activationEvents": [
+        "onLanguage:search-result"
+      ],
+      "icon": "images/icon.png",
+      "enabledApiProposals": [
+        "documentFiltersExclusive"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -13791,9 +13086,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin tgjones/shaders-tmLanguage grammars/shaderlab.json ./syntaxes/shaderlab.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -13819,10 +13111,6 @@
             "scopeName": "source.shaderlab"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -13841,9 +13129,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin jeff-hykin/better-shell-syntax autogenerated/shell.tmLanguage.json ./syntaxes/shell-unix-bash.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -13931,10 +13216,6 @@
             "editor.defaultColorDecorators": "never"
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -13948,36 +13229,15 @@
       "name": "simple-browser",
       "displayName": "%displayName%",
       "description": "%description%",
-      "enabledApiProposals": [
-        "externalUriOpener"
-      ],
       "version": "10.0.0",
-      "icon": "media/icon.png",
       "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
       "engines": {
         "vscode": "^1.70.0"
       },
       "categories": [
         "Other"
       ],
-      "extensionKind": [
-        "ui",
-        "workspace"
-      ],
-      "activationEvents": [
-        "onCommand:simpleBrowser.api.open",
-        "onOpenExternalUri:http",
-        "onOpenExternalUri:https",
-        "onWebviewPanel:simpleBrowser.view"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": true,
-        "untrustedWorkspaces": {
-          "supported": true
-        }
-      },
       "contributes": {
         "commands": [
           {
@@ -14008,30 +13268,25 @@
           }
         ]
       },
-      "scripts": {
-        "compile": "gulp compile-extension:simple-browser && npm run build-webview",
-        "watch": "npm run build-webview && gulp watch-extension:simple-browser",
-        "vscode:prepublish": "npm run build-ext && npm run build-webview",
-        "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.mjs compile-extension:simple-browser ./tsconfig.json",
-        "build-webview": "node ./esbuild.webview.mts",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.json --noEmit --watch"
-      },
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8"
-      },
-      "devDependencies": {
-        "@types/node": "22.x",
-        "@types/vscode-webview": "^1.57.0",
-        "@vscode/codicons": "^0.0.36"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onCommand:simpleBrowser.api.open",
+        "onOpenExternalUri:http",
+        "onOpenExternalUri:https",
+        "onWebviewPanel:simpleBrowser.view"
+      ],
+      "extensionKind": [
+        "ui",
+        "workspace"
+      ],
+      "icon": "media/icon.png",
+      "enabledApiProposals": [
+        "externalUriOpener"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+          "supported": true
+        }
       }
     },
     "packageNLS": {
@@ -14051,9 +13306,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.mjs"
       },
       "categories": [
         "Programming Languages"
@@ -14080,10 +13332,6 @@
             "path": "./syntaxes/sql.tmLanguage.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14102,9 +13350,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin jtbandes/swift-tmlanguage Swift.tmLanguage.json ./syntaxes/swift.tmLanguage.json"
       },
       "categories": [
         "Programming Languages"
@@ -14136,10 +13381,6 @@
             "path": "./snippets/swift.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14151,22 +13392,16 @@
     "extensionPath": "terminal-suggest",
     "packageJSON": {
       "name": "terminal-suggest",
-      "publisher": "vscode",
       "displayName": "%displayName%",
       "description": "%description%",
       "version": "1.0.1",
-      "private": true,
+      "publisher": "vscode",
       "license": "MIT",
-      "icon": "./media/icon.png",
       "engines": {
         "vscode": "^1.95.0"
       },
       "categories": [
         "Other"
-      ],
-      "enabledApiProposals": [
-        "terminalCompletionProvider",
-        "terminalShellEnv"
       ],
       "contributes": {
         "commands": [
@@ -14184,22 +13419,14 @@
           ]
         }
       },
-      "scripts": {
-        "compile": "npx gulp compile-extension:terminal-suggest",
-        "watch": "npx gulp watch-extension:terminal-suggest",
-        "pull-zshbuiltins": "node ./scripts/pullZshBuiltins.ts",
-        "pull-fishbuiltins": "node ./scripts/pullFishBuiltins.ts"
-      },
       "activationEvents": [
         "onTerminalShellIntegration:*"
       ],
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
-      },
-      "devDependencies": {
-        "@types/node": "^22.18.10"
-      }
+      "icon": "./media/icon.png",
+      "enabledApiProposals": [
+        "terminalCompletionProvider",
+        "terminalShellEnv"
+      ]
     },
     "packageNLS": {
       "description": "Extension to add terminal completions for zsh, bash, and fish terminals.",
@@ -14232,10 +13459,6 @@
             "path": "./themes/abyss-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14250,15 +13473,15 @@
       "name": "theme-defaults",
       "displayName": "%displayName%",
       "description": "%description%",
-      "categories": [
-        "Themes"
-      ],
       "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "*"
       },
+      "categories": [
+        "Themes"
+      ],
       "contributes": {
         "themes": [
           {
@@ -14329,10 +13552,6 @@
             "path": "./fileicons/vs_minimal-icon-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14375,10 +13594,6 @@
             "path": "./themes/kimbie-dark-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14411,10 +13626,6 @@
             "path": "./themes/monokai-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14447,10 +13658,6 @@
             "path": "./themes/dimmed-monokai-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14483,10 +13690,6 @@
             "path": "./themes/quietlight-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14519,10 +13722,6 @@
             "path": "./themes/Red-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14535,16 +13734,11 @@
     "extensionPath": "theme-seti",
     "packageJSON": {
       "name": "vscode-theme-seti",
-      "private": true,
-      "version": "10.0.0",
       "displayName": "%displayName%",
       "description": "%description%",
+      "version": "10.0.0",
       "publisher": "vscode",
       "license": "MIT",
-      "icon": "icons/seti-circular-128x128.png",
-      "scripts": {
-        "update": "node ./build/update-icon-theme.js"
-      },
       "engines": {
         "vscode": "*"
       },
@@ -14560,10 +13754,7 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
-      }
+      "icon": "icons/seti-circular-128x128.png"
     },
     "packageNLS": {
       "displayName": "Seti File Icon Theme",
@@ -14595,10 +13786,6 @@
             "path": "./themes/solarized-dark-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14631,10 +13818,6 @@
             "path": "./themes/solarized-light-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14667,10 +13850,6 @@
             "path": "./themes/tomorrow-night-blue-color-theme.json"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14683,17 +13862,13 @@
     "extensionPath": "typescript-basics",
     "packageJSON": {
       "name": "typescript",
-      "description": "%description%",
       "displayName": "%displayName%",
+      "description": "%description%",
       "version": "10.0.0",
-      "author": "vscode",
       "publisher": "vscode",
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammars.mjs"
       },
       "categories": [
         "Programming Languages"
@@ -14880,10 +14055,6 @@
             "path": "./snippets/typescript.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -14895,86 +14066,16 @@
     "extensionPath": "typescript-language-features",
     "packageJSON": {
       "name": "typescript-language-features",
-      "description": "%description%",
       "displayName": "%displayName%",
+      "description": "%description%",
       "version": "10.0.0",
-      "author": "vscode",
       "publisher": "vscode",
       "license": "MIT",
-      "aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
-      "enabledApiProposals": [
-        "workspaceTrust",
-        "multiDocumentHighlightProvider",
-        "codeActionAI",
-        "codeActionRanges",
-        "editorHoverVerbosityLevel"
-      ],
-      "capabilities": {
-        "virtualWorkspaces": {
-          "supported": "limited",
-          "description": "%virtualWorkspaces%"
-        },
-        "untrustedWorkspaces": {
-          "supported": "limited",
-          "description": "%workspaceTrust%",
-          "restrictedConfigurations": [
-            "typescript.tsdk",
-            "js/ts.tsdk.path",
-            "typescript.tsserver.pluginPaths",
-            "js/ts.tsserver.pluginPaths",
-            "typescript.npm",
-            "js/ts.tsserver.npm.path",
-            "typescript.tsserver.nodePath",
-            "js/ts.tsserver.node.path",
-            "js/ts.tsserver.diagnosticDir",
-            "js/ts.tsserver.heapProfile"
-          ]
-        }
-      },
       "engines": {
         "vscode": "^1.30.0"
       },
-      "icon": "media/icon.png",
       "categories": [
         "Programming Languages"
-      ],
-      "dependencies": {
-        "@vscode/extension-telemetry": "^0.9.8",
-        "@vscode/sync-api-client": "^0.7.2",
-        "@vscode/sync-api-common": "^0.7.2",
-        "@vscode/sync-api-service": "^0.7.3",
-        "@vscode/ts-package-manager": "^0.0.2",
-        "jsonc-parser": "^3.2.0",
-        "semver": "7.5.2",
-        "vscode-tas-client": "^0.1.84",
-        "vscode-uri": "^3.0.3"
-      },
-      "devDependencies": {
-        "@types/node": "22.x",
-        "@types/semver": "^5.5.0"
-      },
-      "scripts": {
-        "vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.mjs compile-extension:typescript-language-features",
-        "compile-web": "npm-run-all2 -lp bundle-web typecheck-web",
-        "bundle-web": "node ./esbuild.browser.mts",
-        "typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit",
-        "watch-web": "npm-run-all2 -lp watch-bundle-web watch-typecheck-web",
-        "watch-bundle-web": "node ./esbuild.browser.mts --watch",
-        "watch-typecheck-web": "tsgo --project ./tsconfig.browser.json --noEmit --watch"
-      },
-      "activationEvents": [
-        "onLanguage:javascript",
-        "onLanguage:javascriptreact",
-        "onLanguage:typescript",
-        "onLanguage:typescriptreact",
-        "onLanguage:jsx-tags",
-        "onCommand:typescript.tsserverRequest",
-        "onCommand:_typescript.configurePlugin",
-        "onCommand:_typescript.learnMoreAboutRefactorings",
-        "onCommand:typescript.fileReferences",
-        "onTaskType:typescript",
-        "onLanguage:jsonc",
-        "onWalkthrough:nodejsWelcome"
       ],
       "contributes": {
         "jsonValidation": [
@@ -18026,9 +17127,49 @@
           }
         ]
       },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
+      "activationEvents": [
+        "onLanguage:javascript",
+        "onLanguage:javascriptreact",
+        "onLanguage:typescript",
+        "onLanguage:typescriptreact",
+        "onLanguage:jsx-tags",
+        "onCommand:typescript.tsserverRequest",
+        "onCommand:_typescript.configurePlugin",
+        "onCommand:_typescript.learnMoreAboutRefactorings",
+        "onCommand:typescript.fileReferences",
+        "onTaskType:typescript",
+        "onLanguage:jsonc",
+        "onWalkthrough:nodejsWelcome"
+      ],
+      "icon": "media/icon.png",
+      "enabledApiProposals": [
+        "workspaceTrust",
+        "multiDocumentHighlightProvider",
+        "codeActionAI",
+        "codeActionRanges",
+        "editorHoverVerbosityLevel"
+      ],
+      "capabilities": {
+        "virtualWorkspaces": {
+          "supported": "limited",
+          "description": "%virtualWorkspaces%"
+        },
+        "untrustedWorkspaces": {
+          "supported": "limited",
+          "description": "%workspaceTrust%",
+          "restrictedConfigurations": [
+            "typescript.tsdk",
+            "js/ts.tsdk.path",
+            "typescript.tsserver.pluginPaths",
+            "js/ts.tsserver.pluginPaths",
+            "typescript.npm",
+            "js/ts.tsserver.npm.path",
+            "typescript.tsserver.nodePath",
+            "js/ts.tsserver.node.path",
+            "js/ts.tsserver.diagnosticDir",
+            "js/ts.tsserver.heapProfile"
+          ]
+        }
       }
     },
     "packageNLS": {
@@ -18384,9 +17525,6 @@
       "engines": {
         "vscode": "*"
       },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/asp.vb.net.tmbundle Syntaxes/ASP%20VB.net.plist ./syntaxes/asp-vb-net.tmLanguage.json"
-      },
       "categories": [
         "Programming Languages"
       ],
@@ -18421,10 +17559,6 @@
             "path": "./snippets/vb.code-snippets"
           }
         ]
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -18547,13 +17681,6 @@
             "path": "./syntaxes/xsl.tmLanguage.json"
           }
         ]
-      },
-      "scripts": {
-        "update-grammar": "node ../node_modules/vscode-grammar-updater/bin atom/language-xml grammars/xml.cson ./syntaxes/xml.tmLanguage.json grammars/xsl.cson ./syntaxes/xsl.tmLanguage.json"
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {
@@ -18572,9 +17699,6 @@
       "license": "MIT",
       "engines": {
         "vscode": "*"
-      },
-      "scripts": {
-        "update-grammar": "node ./build/update-grammar.js"
       },
       "categories": [
         "Programming Languages"
@@ -18673,10 +17797,6 @@
             "editor.autoIndent": "advanced"
           }
         }
-      },
-      "repository": {
-        "type": "git",
-        "url": "https://github.com/microsoft/vscode.git"
       }
     },
     "packageNLS": {

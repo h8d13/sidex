@@ -154,7 +154,6 @@ import './contrib/extensions/browser/extensions.web.contribution.js';
 
 // Terminal
 import './contrib/terminal/browser/terminal.web.contribution.js';
-import './contrib/externalTerminal/browser/externalTerminal.contribution.js';
 import './contrib/terminal/browser/terminalInstanceService.js';
 
 // Tasks

@@ -213,8 +213,14 @@ class TauriPty extends Disposable implements ITerminalChildProcess {
 		if (this._backendId !== undefined && _invoke) {
 			_invoke('terminal_kill', { terminalId: this._backendId }).catch(() => { });
 		}
-		this._unlisten?.();
-		this._unlistenExit?.();
+		if (this._unlisten) {
+			this._unlisten();
+			this._unlisten = undefined;
+		}
+		if (this._unlistenExit) {
+			this._unlistenExit();
+			this._unlistenExit = undefined;
+		}
 	}
 
 	input(data: string): void {

@@ -200,28 +200,28 @@ import './contrib/preferences/browser/preferencesSearch.js';
 // Performance
 import './contrib/performance/browser/performance.contribution.js';
 
-// Notebook
-import './contrib/notebook/browser/notebook.contribution.js';
+// Notebook (lazy-loaded — only imported when a notebook document is opened)
+// import './contrib/notebook/browser/notebook.contribution.js';
 
 // Speech
 import './contrib/speech/browser/speech.contribution.js';
 
-// Chat
-import './contrib/chat/browser/chat.contribution.js';
-import './contrib/inlineChat/browser/inlineChat.contribution.js';
-import './contrib/mcp/browser/mcp.contribution.js';
-import './contrib/chat/browser/chatSessions/chatSessions.contribution.js';
-import './contrib/chat/browser/contextContrib/chatContext.contribution.js';
-import './contrib/imageCarousel/browser/imageCarousel.contribution.js';
+// Chat (lazy-loaded — only imported when chat features are activated)
+// import './contrib/chat/browser/chat.contribution.js';
+// import './contrib/inlineChat/browser/inlineChat.contribution.js';
+// import './contrib/mcp/browser/mcp.contribution.js';
+// import './contrib/chat/browser/chatSessions/chatSessions.contribution.js';
+// import './contrib/chat/browser/contextContrib/chatContext.contribution.js';
+// import './contrib/imageCarousel/browser/imageCarousel.contribution.js';
 
-// Interactive
-import './contrib/interactive/browser/interactive.contribution.js';
+// Interactive (lazy-loaded — only imported when interactive window is opened)
+// import './contrib/interactive/browser/interactive.contribution.js';
 
-// repl
-import './contrib/replNotebook/browser/repl.contribution.js';
+// repl (lazy-loaded)
+// import './contrib/replNotebook/browser/repl.contribution.js';
 
-// Testing
-import './contrib/testing/browser/testing.contribution.js';
+// Testing (lazy-loaded — only imported when test explorer is opened)
+// import './contrib/testing/browser/testing.contribution.js';
 
 // Logs
 import './contrib/logs/common/logs.contribution.js';
@@ -319,9 +319,9 @@ import './contrib/relauncher/browser/relauncher.contribution.js';
 // Tasks
 import './contrib/tasks/browser/task.contribution.js';
 
-// Remote
-import './contrib/remote/common/remote.contribution.js';
-import './contrib/remote/browser/remote.contribution.js';
+// Remote (lazy-loaded — only needed for remote connections)
+// import './contrib/remote/common/remote.contribution.js';
+// import './contrib/remote/browser/remote.contribution.js';
 
 // Emmet
 import './contrib/emmet/browser/emmet.contribution.js';
@@ -395,8 +395,8 @@ import './contrib/userDataProfile/browser/userDataProfile.contribution.js';
 // Continue Edit Session
 import './contrib/editSessions/browser/editSessions.contribution.js';
 
-// Remote Coding Agents
-import './contrib/remoteCodingAgents/browser/remoteCodingAgents.contribution.js';
+// Remote Coding Agents (lazy-loaded)
+// import './contrib/remoteCodingAgents/browser/remoteCodingAgents.contribution.js';
 
 // Code Actions
 import './contrib/codeActions/browser/codeActions.contribution.js';

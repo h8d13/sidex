@@ -178,6 +178,24 @@ pub fn run() {
             let menu = build_menu(app.handle())?;
             app.set_menu(menu)?;
 
+            // Inject memory pressure monitoring script into the webview
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.eval(r#"
+                    (function() {
+                        var MEMORY_CHECK_INTERVAL = 60000;
+                        var MEMORY_WARN_THRESHOLD = 400 * 1024 * 1024;
+                        setInterval(function() {
+                            if (performance && performance.memory) {
+                                var used = performance.memory.usedJSHeapSize;
+                                if (used > MEMORY_WARN_THRESHOLD) {
+                                    console.warn('[SideX] High memory usage: ' + Math.round(used / 1024 / 1024) + 'MB');
+                                }
+                            }
+                        }, MEMORY_CHECK_INTERVAL);
+                    })();
+                "#);
+            }
+
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
