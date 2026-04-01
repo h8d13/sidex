@@ -11,7 +11,6 @@ import type { SearchAddon as SearchAddonType } from '@xterm/addon-search';
 import type { SerializeAddon as SerializeAddonType } from '@xterm/addon-serialize';
 import type { Unicode11Addon as Unicode11AddonType } from '@xterm/addon-unicode11';
 import type { WebglAddon as WebglAddonType } from '@xterm/addon-webgl';
-import { importAMDNodeModule } from '../../../../../amdX.js';
 
 export interface IXtermAddonNameToCtor {
 	clipboard: typeof ClipboardAddonType;
@@ -40,15 +39,20 @@ export class XtermAddonImporter {
 	async importAddon<T extends keyof IXtermAddonNameToCtor>(name: T): Promise<IXtermAddonNameToCtor[T]> {
 		let addon = importedAddons.get(name);
 		if (!addon) {
-			switch (name) {
-				case 'clipboard': addon = (await importAMDNodeModule<typeof import('@xterm/addon-clipboard')>('@xterm/addon-clipboard', 'lib/addon-clipboard.js')).ClipboardAddon as IXtermAddonNameToCtor[T]; break;
-				case 'image': addon = (await importAMDNodeModule<typeof import('@xterm/addon-image')>('@xterm/addon-image', 'lib/addon-image.js')).ImageAddon as IXtermAddonNameToCtor[T]; break;
-				case 'ligatures': addon = (await importAMDNodeModule<typeof import('@xterm/addon-ligatures')>('@xterm/addon-ligatures', 'lib/addon-ligatures.js')).LigaturesAddon as IXtermAddonNameToCtor[T]; break;
-				case 'progress': addon = (await importAMDNodeModule<typeof import('@xterm/addon-progress')>('@xterm/addon-progress', 'lib/addon-progress.js')).ProgressAddon as IXtermAddonNameToCtor[T]; break;
-				case 'search': addon = (await importAMDNodeModule<typeof import('@xterm/addon-search')>('@xterm/addon-search', 'lib/addon-search.js')).SearchAddon as IXtermAddonNameToCtor[T]; break;
-				case 'serialize': addon = (await importAMDNodeModule<typeof import('@xterm/addon-serialize')>('@xterm/addon-serialize', 'lib/addon-serialize.js')).SerializeAddon as IXtermAddonNameToCtor[T]; break;
-				case 'unicode11': addon = (await importAMDNodeModule<typeof import('@xterm/addon-unicode11')>('@xterm/addon-unicode11', 'lib/addon-unicode11.js')).Unicode11Addon as IXtermAddonNameToCtor[T]; break;
-				case 'webgl': addon = (await importAMDNodeModule<typeof import('@xterm/addon-webgl')>('@xterm/addon-webgl', 'lib/addon-webgl.js')).WebglAddon as IXtermAddonNameToCtor[T]; break;
+			try {
+				switch (name) {
+					case 'clipboard': addon = (await import('@xterm/addon-clipboard')).ClipboardAddon as IXtermAddonNameToCtor[T]; break;
+					case 'image': addon = (await import('@xterm/addon-image')).ImageAddon as IXtermAddonNameToCtor[T]; break;
+					case 'search': addon = (await import('@xterm/addon-search')).SearchAddon as IXtermAddonNameToCtor[T]; break;
+					case 'serialize': addon = (await import('@xterm/addon-serialize')).SerializeAddon as IXtermAddonNameToCtor[T]; break;
+					case 'unicode11': addon = (await import('@xterm/addon-unicode11')).Unicode11Addon as IXtermAddonNameToCtor[T]; break;
+					case 'webgl': addon = (await import('@xterm/addon-webgl')).WebglAddon as IXtermAddonNameToCtor[T]; break;
+					case 'progress': addon = (await import('@xterm/addon-progress')).ProgressAddon as IXtermAddonNameToCtor[T]; break;
+					case 'ligatures': addon = (await import('@xterm/addon-ligatures')).LigaturesAddon as IXtermAddonNameToCtor[T]; break;
+				}
+			} catch (e) {
+				console.warn(`[SideX] Failed to load xterm addon '${name}':`, e);
+				throw new Error(`Could not load addon ${name}`);
 			}
 			if (!addon) {
 				throw new Error(`Could not load addon ${name}`);

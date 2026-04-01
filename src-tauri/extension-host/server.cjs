@@ -78,8 +78,20 @@ function encodeFrame(opcode, data) {
 
 // ── Extension Host State ────────────────────────────────────────────────
 
-let host = null; // loaded lazily on first connection
+let host = null;
 const HOST_PATH = path.join(__dirname, 'host.cjs');
+
+function getDefaultExtensionPaths() {
+  const paths = [];
+  const homeDir = require('os').homedir();
+  const extDir = path.join(homeDir, '.sidex', 'extensions');
+  paths.push(extDir);
+  const localExt = path.join(process.cwd(), 'extensions');
+  if (localExt !== extDir) paths.push(localExt);
+  const tauriExt = path.join(__dirname, '..', 'extensions');
+  paths.push(tauriExt);
+  return paths;
+}
 
 // ── WebSocket Connection Handler ────────────────────────────────────────
 
@@ -105,6 +117,7 @@ function handleUpgrade(req, socket) {
   }
 
   let buffer = Buffer.alloc(0);
+  let msgIdCounter = 1000;
 
   const sendJson = (obj) => {
     try {
@@ -116,6 +129,32 @@ function handleUpgrade(req, socket) {
   host.on('event', onHostEvent);
 
   log('client connected');
+
+  // Auto-discover and load extensions on connection
+  const extPaths = getDefaultExtensionPaths();
+  const discoverResult = host.handleMessage({ id: msgIdCounter++, type: 'discoverExtensions', params: { paths: extPaths } });
+  if (discoverResult && discoverResult.result) {
+    const discovered = discoverResult.result;
+    log(`discovered ${discovered.length} extensions`);
+    sendJson({ type: 'extensionsDiscovered', extensions: discovered });
+
+    for (const ext of discovered) {
+      try {
+        const loadResult = host.handleMessage({ id: msgIdCounter++, type: 'loadExtension', params: { extensionPath: ext.path } });
+        if (loadResult && loadResult.result) {
+          const activationEvents = ext.activationEvents || [];
+          if (activationEvents.includes('*') || activationEvents.includes('onStartupFinished') || activationEvents.length === 0) {
+            const activateResult = host.handleMessage({ id: msgIdCounter++, type: 'activateExtension', params: { extensionId: ext.id } });
+            if (activateResult && !activateResult.error) {
+              log(`auto-activated ${ext.id}`);
+            }
+          }
+        }
+      } catch (e) {
+        log(`failed to load/activate ${ext.id}: ${e.message}`);
+      }
+    }
+  }
 
   socket.on('data', (chunk) => {
     buffer = Buffer.concat([buffer, chunk]);
@@ -183,7 +222,13 @@ async function main() {
 
   const server = http.createServer((_req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok' }));
+    const extensions = [];
+    if (host) {
+      for (const [id, ext] of host._extensions) {
+        extensions.push({ id, activated: ext.activated });
+      }
+    }
+    res.end(JSON.stringify({ status: 'ok', extensions }));
   });
 
   server.on('upgrade', (req, socket, _head) => {
