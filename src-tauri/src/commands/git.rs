@@ -355,7 +355,7 @@ pub async fn git_show(path: String, file: String) -> Result<Vec<u8>, String> {
 
 const GIT_ALLOWED_SUBCOMMANDS: &[&str] = &[
     "add", "am", "apply", "archive", "bisect", "blame", "branch", "cat-file",
-    "cherry-pick", "checkout", "clone", "commit", "describe", "diff",
+    "cherry-pick", "checkout", "clone", "commit", "describe", "diff", "diff-tree",
     "fetch", "for-each-ref", "format-patch", "gc", "grep", "hash-object",
     "init", "log", "ls-files", "ls-remote", "ls-tree", "merge", "pack-refs",
     "prune", "pull", "push", "rebase", "reflog", "remote", "reset", "revert",

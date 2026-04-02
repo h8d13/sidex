@@ -85,7 +85,6 @@ import './mainThreadShare.js';
 import './mainThreadProfileContentHandlers.js';
 import './mainThreadDataChannels.js';
 import './mainThreadMeteredConnection.js';
-import './mainThreadGitExtensionService.js';
 import './mainThreadBrowsers.js';
 
 export class ExtensionPoints implements IWorkbenchContribution {

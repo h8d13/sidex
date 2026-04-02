@@ -178,13 +178,13 @@ export const startEntries: GettingStartedStartEntryContent = [
 	},
 	{
 		id: 'topLevelGitOpen',
-		title: localize('gettingStarted.topLevelGitOpen.title', "Open Repository..."),
-		description: localize('gettingStarted.topLevelGitOpen.description', "Connect to a remote repository or pull request to browse, search, edit, and commit"),
+		title: localize('gettingStarted.topLevelGitOpen.title', "Clone Repository..."),
+		description: localize('gettingStarted.topLevelGitOpen.description', "Clone a remote repository to browse, edit, and commit"),
 		when: 'workspacePlatform == \'webworker\'',
 		icon: Codicon.sourceControl,
 		content: {
 			type: 'startEntry',
-			command: 'command:remoteHub.openRepository',
+			command: 'command:git.clone',
 		}
 	},
 	{
@@ -353,7 +353,7 @@ export const walkthroughs: GettingStartedWalkthroughContent = [
 				{
 					id: 'pickAFolderTask-WebWeb',
 					title: localize('gettingStarted.setup.OpenFolder.title', "Open up your code"),
-					description: localize('gettingStarted.setup.OpenFolderWeb.description.interpolated', "You're all set to start coding. You can open a local project or a remote repository to get your files into VS Code.\n{0}\n{1}", Button(localize('openFolder', "Open Folder"), 'command:workbench.action.addRootFolder'), Button(localize('openRepository', "Open Repository"), 'command:remoteHub.openRepository')),
+					description: localize('gettingStarted.setup.OpenFolderWeb.description.interpolated', "You're all set to start coding. You can open a local project or clone a repository to get your files into SideX.\n{0}\n{1}", Button(localize('openFolder', "Open Folder"), 'command:workbench.action.addRootFolder'), Button(localize('cloneRepository', "Clone Repository"), 'command:git.clone')),
 					when: 'workspaceFolderCount == 0',
 					media: {
 						type: 'svg', altText: 'Explorer view showing buttons for opening folder and cloning repository.', path: 'openFolder.svg'

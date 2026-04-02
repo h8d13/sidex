@@ -482,9 +482,6 @@ export class DefaultBackgroundTokenizer implements IBackgroundTokenizer {
 
 	private _isScheduled = false;
 	private _beginBackgroundTokenization(): void {
-		// DISABLED: Background tokenization causes scroll lag and high memory usage
-		return;
-		/*
 		if (this._isScheduled || !this._tokenizerWithStateStore._textModel.isAttachedToEditor() || !this._hasLinesToTokenize()) {
 			return;
 		}
@@ -495,7 +492,6 @@ export class DefaultBackgroundTokenizer implements IBackgroundTokenizer {
 
 			this._backgroundTokenizeWithDeadline(deadline);
 		});
-		*/
 	}
 
 	/**
