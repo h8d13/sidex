@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 0.1.0)"
+        required: true
+        default: "0.1.0"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -229,9 +235,7 @@ jobs:
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
         run: |
-          VERSION="${{ github.ref_name }}"
-          aws s3 sync all-artifacts/ \
-            "s3://siden-assets/releases/sidex/${VERSION}/" \
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
             --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
             --delete
 
@@ -248,8 +252,7 @@ jobs:
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
         run: |
-          VERSION="${{ github.ref_name }}"
-          BASE_URL="https://github.com/${{ github.repository }}/releases/download/${VERSION}"
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
           DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
           MACOS_SIG=$(cat all-artifacts/*.app.tar.gz.sig 2>/dev/null | head -1 || echo "")
