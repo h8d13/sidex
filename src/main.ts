@@ -99,10 +99,6 @@ async function boot() {
 			enabled: false,
 		},
 		additionalBuiltinExtensions: [],
-		defaultLayout: {
-			editors: [],
-			layout: { editors: {} },
-		},
 		configurationDefaults: {
 			'workbench.startupEditor': 'welcomePage',
 			'workbench.enableExperiments': false,
@@ -111,7 +107,7 @@ async function boot() {
 			'editor.experimentalGpuAcceleration': 'auto',
 			'workbench.productIconTheme': 'Default',
 			'workbench.editor.showTabs': 'multiple',
-			'workbench.editor.enablePreview': true,
+			'workbench.editor.enablePreview': false,
 			'workbench.editor.tabCloseButton': 'right',
 			'window.menuBarVisibility': 'hidden',
 			'window.titleBarStyle': 'custom',
