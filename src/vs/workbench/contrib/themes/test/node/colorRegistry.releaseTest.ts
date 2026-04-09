@@ -7,18 +7,11 @@ import * as fs from 'fs';
 import { Registry } from '../../../../../platform/registry/common/platform.js';
 import { IColorRegistry, Extensions, ColorContribution, asCssVariableName } from '../../../../../platform/theme/common/colorRegistry.js';
 import { ISizeRegistry, Extensions as SizeExtensions, asCssVariableName as asSizeCssVariableName } from '../../../../../platform/theme/common/sizeUtils.js';
-import { asTextOrError } from '../../../../../platform/request/common/request.js';
 import * as pfs from '../../../../../base/node/pfs.js';
 import * as path from '../../../../../base/common/path.js';
 import assert from 'assert';
-import { CancellationToken } from '../../../../../base/common/cancellation.js';
-import { RequestService } from '../../../../../platform/request/node/requestService.js';
-import { TestConfigurationService } from '../../../../../platform/configuration/test/common/testConfigurationService.js';
 // eslint-disable-next-line local/code-import-patterns
 import '../../../../workbench.desktop.main.js';
-import { NullLogService } from '../../../../../platform/log/common/log.js';
-import { mock } from '../../../../../base/test/common/mock.js';
-import { INativeEnvironmentService } from '../../../../../platform/environment/common/environment.js';
 import { FileAccess } from '../../../../../base/common/network.js';
 
 interface ColorInfo {
@@ -116,13 +109,10 @@ suite('Color Registry', function () {
 	});
 
 	test('all colors listed in theme-color.md', async function () {
-		// avoid importing the TestEnvironmentService as it brings in a duplicate registration of the file editor input factory.
-		const environmentService = new class extends mock<INativeEnvironmentService>() { override args = { _: [] }; };
-
 		const docUrl = 'https://raw.githubusercontent.com/microsoft/vscode-docs/vnext/api/references/theme-color.md';
 
-		const reqContext = await new RequestService('local', new TestConfigurationService(), environmentService, new NullLogService()).request({ url: docUrl, callSite: 'colorRegistry.releaseTest' }, CancellationToken.None);
-		const content = (await asTextOrError(reqContext))!;
+		const response = await fetch(docUrl);
+		const content = await response.text();
 
 		const expression = /-\s*\`([\w\.]+)\`: (.*)/g;
 

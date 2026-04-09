@@ -22,8 +22,6 @@ import { createFileSystemProviderError, IFileAtomicReadOptions, IFileDeleteOptio
 import { readFileIntoStream } from '../common/io.js';
 import { AbstractNonRecursiveWatcherClient, AbstractUniversalWatcherClient, ILogMessage } from '../common/watcher.js';
 import { AbstractDiskFileSystemProvider } from '../common/diskFileSystemProvider.js';
-import { UniversalWatcherClient } from './watcher/watcherClient.js';
-import { NodeJSWatcherClient } from './watcher/nodejs/nodejsClient.js';
 
 const constants = { S_IXUSR: 0o100, S_IXGRP: 0o010, S_IXOTH: 0o001 };
 
@@ -822,7 +820,7 @@ export class DiskFileSystemProvider extends AbstractDiskFileSystemProvider imple
 		onLogMessage: (msg: ILogMessage) => void,
 		verboseLogging: boolean
 	): AbstractUniversalWatcherClient {
-		return new UniversalWatcherClient(changes => onChange(changes), msg => onLogMessage(msg), verboseLogging);
+		throw new Error('File watching is handled by the Rust backend via watch.rs commands');
 	}
 
 	protected createNonRecursiveWatcher(
@@ -830,7 +828,7 @@ export class DiskFileSystemProvider extends AbstractDiskFileSystemProvider imple
 		onLogMessage: (msg: ILogMessage) => void,
 		verboseLogging: boolean
 	): AbstractNonRecursiveWatcherClient {
-		return new NodeJSWatcherClient(changes => onChange(changes), msg => onLogMessage(msg), verboseLogging);
+		throw new Error('File watching is handled by the Rust backend via watch.rs commands');
 	}
 
 	//#endregion

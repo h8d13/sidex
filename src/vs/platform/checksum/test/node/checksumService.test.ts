@@ -7,7 +7,7 @@ import assert from 'assert';
 import { FileAccess, Schemas } from '../../../../base/common/network.js';
 import { URI } from '../../../../base/common/uri.js';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
-import { ChecksumService } from '../../node/checksumService.js';
+import { ChecksumService } from '../../browser/checksumService.js';
 import { IFileService } from '../../../files/common/files.js';
 import { FileService } from '../../../files/common/fileService.js';
 import { DiskFileSystemProvider } from '../../../files/node/diskFileSystemProvider.js';
