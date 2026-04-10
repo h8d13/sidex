@@ -18,6 +18,8 @@ import { IQuickInputService } from '../../../../platform/quickinput/common/quick
 import { ILanguageConfigurationService } from '../../../../editor/common/languages/languageConfigurationRegistry.js';
 import type { LanguageConfiguration } from '../../../../editor/common/languages/languageConfiguration.js';
 import { IWorkspaceContextService } from '../../../../platform/workspace/common/workspace.js';
+import { IStatusbarService, StatusbarAlignment } from '../../../services/statusbar/browser/statusbar.js';
+import type { IStatusbarEntryAccessor } from '../../../services/statusbar/browser/statusbar.js';
 import type { ITextModel } from '../../../../editor/common/model.js';
 import type { Position } from '../../../../editor/common/core/position.js';
 import type { CancellationToken } from '../../../../base/common/cancellation.js';
@@ -142,6 +144,7 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 	private _failureBurstLog = new Map<string, number>();
 
 	private _bootstrapExtensions: IExtensionManifestSummary[] = [];
+	private _statusBarItems = new Map<string, IStatusbarEntryAccessor>();
 
 	constructor(
 		@ILogService private readonly logService: ILogService,
@@ -153,6 +156,7 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 		@IQuickInputService private readonly quickInputService: IQuickInputService,
 		@ILanguageConfigurationService private readonly langConfigService: ILanguageConfigurationService,
 		@IWorkspaceContextService private readonly workspaceContextService: IWorkspaceContextService,
+		@IStatusbarService private readonly statusbarService: IStatusbarService,
 	) {
 		super();
 		this._init();
@@ -503,6 +507,8 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 		this._providerRegistrations.forEach(d => d.dispose());
 		this._wasmProviderRegistrations.forEach(d => d.dispose());
 		this._langConfigDisposables.forEach(d => d.dispose());
+		this._statusBarItems.forEach(a => a.dispose());
+		this._statusBarItems.clear();
 		this._modelContentListeners.forEach(d => d.dispose());
 		this._modelContentListeners.clear();
 		this._tauriWatchUnlisten?.();
@@ -629,6 +635,18 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 				break;
 			case 'stopFileWatch':
 				this._onStopFileWatch(msg.watcherId);
+				break;
+			case 'statusBarItemShow':
+				this._onStatusBarItemShow(msg);
+				break;
+			case 'statusBarItemUpdate':
+				this._onStatusBarItemUpdate(msg);
+				break;
+			case 'statusBarItemHide':
+				this._onStatusBarItemHide(msg.id);
+				break;
+			case 'statusBarItemRemove':
+				this._onStatusBarItemRemove(msg.id);
 				break;
 		}
 	}
@@ -1749,6 +1767,65 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 			this.logService.info(`[ExtHost] File watch ${watcherId} stopped`);
 		} catch {
 			// best-effort cleanup
+		}
+	}
+
+	// ── Status Bar ───────────────────────────────────────────────────────────
+
+	private _toWorkbenchAlignment(apiAlignment: number): StatusbarAlignment {
+		// vscode API: Left=1, Right=2 → workbench: LEFT=0, RIGHT=1
+		return apiAlignment === 2 ? StatusbarAlignment.RIGHT : StatusbarAlignment.LEFT;
+	}
+
+	private _makeStatusbarEntry(msg: any) {
+		return {
+			name: msg.name || msg.id,
+			text: msg.text || '',
+			ariaLabel: msg.name || msg.id,
+			tooltip: msg.tooltip || undefined,
+			command: msg.command || undefined,
+		};
+	}
+
+	private _onStatusBarItemShow(msg: any): void {
+		const existing = this._statusBarItems.get(msg.id);
+		if (existing) {
+			existing.update(this._makeStatusbarEntry(msg));
+			return;
+		}
+		try {
+			const accessor = this.statusbarService.addEntry(
+				this._makeStatusbarEntry(msg),
+				msg.id,
+				this._toWorkbenchAlignment(msg.alignment),
+				msg.priority ?? 0,
+			);
+			this._statusBarItems.set(msg.id, accessor);
+		} catch (e) {
+			this.logService.warn(`[ExtHost] statusBarItemShow failed for ${msg.id}:`, e);
+		}
+	}
+
+	private _onStatusBarItemUpdate(msg: any): void {
+		const accessor = this._statusBarItems.get(msg.id);
+		if (accessor) {
+			accessor.update(this._makeStatusbarEntry(msg));
+		}
+	}
+
+	private _onStatusBarItemHide(id: string): void {
+		const accessor = this._statusBarItems.get(id);
+		if (accessor) {
+			accessor.dispose();
+			this._statusBarItems.delete(id);
+		}
+	}
+
+	private _onStatusBarItemRemove(id: string): void {
+		const accessor = this._statusBarItems.get(id);
+		if (accessor) {
+			accessor.dispose();
+			this._statusBarItems.delete(id);
 		}
 	}
 

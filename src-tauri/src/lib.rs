@@ -425,6 +425,12 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            #[cfg(feature = "devtools")]
+            if let Some(window) = app.get_webview_window("main") {
+                window.open_devtools();
+            }
+
             Ok(())
         })
         .on_menu_event(|app, event| {

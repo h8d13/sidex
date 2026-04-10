@@ -2523,21 +2523,87 @@ function createVscodeShim() {
       return ch;
     },
     createStatusBarItem(alignmentOrId, priorityOrAlignment, priorityArg) {
-      return {
-        id: '',
-        text: '',
-        tooltip: '',
-        command: '',
-        alignment: 1,
-        priority: 0,
-        name: '',
-        backgroundColor: undefined,
-        color: undefined,
-        accessibilityInformation: undefined,
-        show() {},
-        hide() {},
-        dispose() {},
+      // Overloads: (alignment?, priority?) or (id, alignment?, priority?)
+      let itemId, alignment, priority;
+      if (typeof alignmentOrId === 'string') {
+        itemId = alignmentOrId;
+        alignment = typeof priorityOrAlignment === 'number' ? priorityOrAlignment : 1;
+        priority = typeof priorityArg === 'number' ? priorityArg : 0;
+      } else {
+        itemId = `sidex-statusbar-${++host._reqId}`;
+        alignment = typeof alignmentOrId === 'number' ? alignmentOrId : 1;
+        priority = typeof priorityOrAlignment === 'number' ? priorityOrAlignment : 0;
+      }
+
+      let _text = '';
+      let _tooltip = '';
+      let _command = '';
+      let _color = undefined;
+      let _backgroundColor = undefined;
+      let _name = '';
+      let _accessibilityInformation = undefined;
+      let _visible = false;
+
+      const emitUpdate = () => {
+        if (!_visible) return;
+        host.emit('event', {
+          type: 'statusBarItemUpdate',
+          id: itemId,
+          text: _text,
+          tooltip: typeof _tooltip === 'string' ? _tooltip : (_tooltip?.value ?? ''),
+          command: typeof _command === 'string' ? _command : _command?.command ?? '',
+          color: _color,
+          backgroundColor: _backgroundColor,
+          name: _name || itemId,
+          alignment,
+          priority,
+        });
       };
+
+      const item = {
+        get id() { return itemId; },
+        get alignment() { return alignment; },
+        get priority() { return priority; },
+        get text() { return _text; },
+        set text(v) { _text = v || ''; emitUpdate(); },
+        get tooltip() { return _tooltip; },
+        set tooltip(v) { _tooltip = v; emitUpdate(); },
+        get command() { return _command; },
+        set command(v) { _command = v; emitUpdate(); },
+        get color() { return _color; },
+        set color(v) { _color = v; emitUpdate(); },
+        get backgroundColor() { return _backgroundColor; },
+        set backgroundColor(v) { _backgroundColor = v; emitUpdate(); },
+        get name() { return _name; },
+        set name(v) { _name = v; emitUpdate(); },
+        get accessibilityInformation() { return _accessibilityInformation; },
+        set accessibilityInformation(v) { _accessibilityInformation = v; },
+        show() {
+          _visible = true;
+          host.emit('event', {
+            type: 'statusBarItemShow',
+            id: itemId,
+            text: _text,
+            tooltip: typeof _tooltip === 'string' ? _tooltip : (_tooltip?.value ?? ''),
+            command: typeof _command === 'string' ? _command : _command?.command ?? '',
+            color: _color,
+            backgroundColor: _backgroundColor,
+            name: _name || itemId,
+            alignment,
+            priority,
+          });
+        },
+        hide() {
+          if (!_visible) return;
+          _visible = false;
+          host.emit('event', { type: 'statusBarItemHide', id: itemId });
+        },
+        dispose() {
+          _visible = false;
+          host.emit('event', { type: 'statusBarItemRemove', id: itemId });
+        },
+      };
+      return item;
     },
     showQuickPick(items, options) {
       return new Promise((resolve) => {
