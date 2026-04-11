@@ -18,6 +18,10 @@ export default defineConfig({
   resolve: {
     alias: {
       'vs': path.resolve(__dirname, 'src/vs'),
+      // Telemetry packages removed — alias to empty stubs so any missed import fails loudly at build time rather than silently at runtime.
+      '@microsoft/1ds-core-js': path.resolve(__dirname, 'src/vs/platform/telemetry/common/1dsAppender.ts'),
+      '@microsoft/1ds-post-js': path.resolve(__dirname, 'src/vs/platform/telemetry/common/1dsAppender.ts'),
+      'tas-client': path.resolve(__dirname, 'src/vs/platform/telemetry/common/1dsAppender.ts'),
     },
   },
   build: {

@@ -426,7 +426,6 @@ pub fn run() {
                 )?;
             }
 
-            #[cfg(feature = "devtools")]
             if let Some(window) = app.get_webview_window("main") {
                 window.open_devtools();
             }
