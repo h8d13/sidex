@@ -45,17 +45,17 @@ RAM savings are most tested on macOS, WKWebView is shared with Safari. On Window
 
 ## What's Working
 
-**Solid:**
-
 - Monaco editor with syntax highlighting and basic IntelliSense
 - File explorer — open folders, create, rename, delete
 - Integrated terminal — full PTY via Rust, shell detection, resize, signals
 - Git — status, diff, log, stage, commit, branch, push/pull/fetch, stash, reset
 - Themes — multiple built-in themes from the VSCode catalogue
 - Native OS menus (macOS, Windows, Linux)
-- Extension installation from [Open VSX](https://open-vsx.org/)
+- Extension installation from [Open VSX](https://open-vsx.org/) NOT FULLY WORKING YET
 - File watching, file search, full-text search, Rust-backed search index
 - SQLite storage, document management (autosave, undo/redo, encoding)
+
+Based of the `1.110.0` upstream build
 
 ---
 
@@ -67,6 +67,7 @@ RAM savings are most tested on macOS, WKWebView is shared with Safari. On Window
 git clone https://github.com/Sidenai/sidex.git
 cd sidex
 npm install
+npm run setup        # fetch built-in extensions (once, after cloning)
 npm run tauri dev
 ```
 
@@ -74,6 +75,7 @@ npm run tauri dev
 
 ```bash
 npm install
+npm run setup        # fetch built-in extensions (once, after cloning)
 
 # macOS / Linux
 NODE_OPTIONS="--max-old-space-size=12288" npm run build

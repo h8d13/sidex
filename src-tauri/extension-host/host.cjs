@@ -1106,6 +1106,460 @@ function log(msg) {
   process.stderr.write(`[ext-host] ${msg}\n`);
 }
 
+// ── Direct LSP Client ────────────────────────────────────────────────────
+// Spawns an LSP server subprocess and speaks JSON-RPC over stdio.
+// Registers hover/completion/definition/diagnostics providers for a language.
+
+class LspClient {
+  constructor(host, languageSelector) {
+    this._host = host;
+    this._selector = Array.isArray(languageSelector) ? languageSelector : [languageSelector];
+    this._proc = null;
+    this._buf = Buffer.alloc(0);
+    this._reqId = 1;
+    this._pending = new Map(); // id → {resolve, reject, timer}
+    this._initialized = false;
+    this._initPromise = null;
+    this._shutdown = false;
+    this._serverCapabilities = {};
+    this._disposables = [];
+  }
+
+  // Start subprocess and perform LSP initialize handshake.
+  start(command, args, env) {
+    const { spawn } = require('child_process');
+    log(`[lsp] spawning: ${command} ${args.join(' ')}`);
+    const proc = spawn(command, args, {
+      env: { ...process.env, ...(env || {}) },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    this._proc = proc;
+
+    proc.on('error', (err) => {
+      log(`[lsp] spawn error: ${err.message}`);
+    });
+    proc.on('exit', (code, signal) => {
+      log(`[lsp] server exited code=${code} signal=${signal}`);
+      this._rejectAll('server exited');
+    });
+    proc.stderr.on('data', (chunk) => {
+      const text = chunk.toString();
+      for (const line of text.split('\n')) {
+        if (line.trim()) log(`[lsp-stderr] ${line}`);
+      }
+    });
+    proc.stdout.on('data', (chunk) => {
+      this._buf = Buffer.concat([this._buf, chunk]);
+      this._drain();
+    });
+
+    this._initPromise = this._initialize();
+    return this._initPromise;
+  }
+
+  // Parse Content-Length framed JSON-RPC messages from buffer.
+  _drain() {
+    while (true) {
+      const str = this._buf.toString('utf8');
+      const headerEnd = str.indexOf('\r\n\r\n');
+      if (headerEnd === -1) break;
+      const header = str.slice(0, headerEnd);
+      const lenMatch = header.match(/Content-Length:\s*(\d+)/i);
+      if (!lenMatch) { this._buf = Buffer.alloc(0); break; }
+      const contentLen = parseInt(lenMatch[1], 10);
+      const bodyStart = headerEnd + 4;
+      if (this._buf.length < bodyStart + contentLen) break;
+      const body = this._buf.slice(bodyStart, bodyStart + contentLen).toString('utf8');
+      this._buf = this._buf.slice(bodyStart + contentLen);
+      try {
+        this._handleMessage(JSON.parse(body));
+      } catch (e) {
+        log(`[lsp] parse error: ${e.message}`);
+      }
+    }
+  }
+
+  _send(msg) {
+    if (!this._proc || this._shutdown) return;
+    const body = JSON.stringify(msg);
+    const frame = `Content-Length: ${Buffer.byteLength(body, 'utf8')}\r\n\r\n${body}`;
+    this._proc.stdin.write(frame);
+  }
+
+  _request(method, params, timeoutMs = 10000) {
+    return new Promise((resolve, reject) => {
+      const id = this._reqId++;
+      const timer = setTimeout(() => {
+        this._pending.delete(id);
+        reject(new Error(`LSP request ${method} timed out`));
+      }, timeoutMs);
+      this._pending.set(id, { resolve, reject, timer });
+      this._send({ jsonrpc: '2.0', id, method, params: params ?? null });
+    });
+  }
+
+  _notify(method, params) {
+    this._send({ jsonrpc: '2.0', method, params: params ?? null });
+  }
+
+  _handleMessage(msg) {
+    // Response to a request
+    if (msg.id !== undefined && msg.id !== null && (msg.result !== undefined || msg.error !== undefined)) {
+      const cb = this._pending.get(msg.id);
+      if (cb) {
+        clearTimeout(cb.timer);
+        this._pending.delete(msg.id);
+        msg.error ? cb.reject(new Error(msg.error.message || JSON.stringify(msg.error))) : cb.resolve(msg.result);
+      }
+      return;
+    }
+    // Notification (no id, or id is null with method)
+    if (msg.method) {
+      this._handleNotification(msg.method, msg.params);
+    }
+  }
+
+  _handleNotification(method, params) {
+    switch (method) {
+      case 'textDocument/publishDiagnostics': {
+        const { uri, diagnostics = [] } = params;
+        // Convert LSP diagnostics to host format
+        const converted = diagnostics.map(d => ({
+          range: d.range,
+          message: d.message,
+          severity: d.severity != null ? d.severity - 1 : 0, // LSP 1=Error,2=Warn,3=Info,4=Hint → host 0=Error,1=Warn,2=Info,3=Hint
+          source: d.source,
+          code: d.code != null ? String(d.code) : undefined,
+        }));
+        this._host._diagnostics.set(uri, converted);
+        this._host.emit('event', { type: 'diagnosticsChanged', uri, diagnostics: converted });
+        break;
+      }
+      case 'window/logMessage':
+        log(`[lsp-log] ${params.message}`);
+        break;
+      case 'window/showMessage':
+        log(`[lsp-msg] ${params.message}`);
+        break;
+      default:
+        break;
+    }
+  }
+
+  _rejectAll(reason) {
+    for (const [, cb] of this._pending) {
+      clearTimeout(cb.timer);
+      cb.reject(new Error(`LSP: ${reason}`));
+    }
+    this._pending.clear();
+  }
+
+  async _initialize() {
+    const workspaceFolders = this._host._workspaceFolders.map(f => ({
+      uri: `file://${f}`,
+      name: require('path').basename(f),
+    }));
+    const rootUri = workspaceFolders.length > 0 ? workspaceFolders[0].uri : null;
+
+    const result = await this._request('initialize', {
+      processId: process.pid,
+      rootUri,
+      workspaceFolders: workspaceFolders.length > 0 ? workspaceFolders : null,
+      capabilities: {
+        textDocument: {
+          synchronization: { dynamicRegistration: false, willSave: false, didSave: false, willSaveWaitUntil: false },
+          completion: { completionItem: { snippetSupport: true, documentationFormat: ['markdown', 'plaintext'] } },
+          hover: { contentFormat: ['markdown', 'plaintext'] },
+          signatureHelp: { signatureInformation: { documentationFormat: ['markdown', 'plaintext'] } },
+          definition: { dynamicRegistration: false },
+          references: { dynamicRegistration: false },
+          documentSymbol: { dynamicRegistration: false, hierarchicalDocumentSymbolSupport: true },
+          publishDiagnostics: { relatedInformation: false },
+        },
+        workspace: { applyEdit: false, workspaceFolders: true },
+      },
+      initializationOptions: {},
+    }, 30000);
+    this._serverCapabilities = result?.capabilities ?? {};
+    this._notify('initialized', {});
+    this._initialized = true;
+    log(`[lsp] initialized, caps: ${Object.keys(this._serverCapabilities).join(', ')}`);
+
+    // Open already-tracked documents
+    for (const [, doc] of this._host._textDocuments) {
+      if (this._matchesSelector(doc.languageId)) {
+        this._notify('textDocument/didOpen', {
+          textDocument: { uri: doc.uri, languageId: doc.languageId, version: doc.version, text: doc.text },
+        });
+      }
+    }
+
+    // Register providers
+    this._registerProviders();
+  }
+
+  _matchesSelector(languageId) {
+    return this._selector.includes('*') || this._selector.includes(languageId);
+  }
+
+  _registerProviders() {
+    const host = this._host;
+    const selector = this._selector;
+
+    const selectorMatch = (languageId) => this._matchesSelector(languageId);
+
+    // Hover
+    const hoverEntry = { selector, provider: { provideHover: (doc, pos, token) => this.hover(doc.uri.toString(), pos) } };
+    host._providers.hover.push(hoverEntry);
+    this._disposables.push({ dispose: () => { const i = host._providers.hover.indexOf(hoverEntry); if (i >= 0) host._providers.hover.splice(i, 1); } });
+
+    // Completion
+    const complEntry = { selector, provider: { provideCompletionItems: (doc, pos, token, ctx) => this.completion(doc.uri.toString(), pos, ctx) } };
+    host._providers.completion.push(complEntry);
+    this._disposables.push({ dispose: () => { const i = host._providers.completion.indexOf(complEntry); if (i >= 0) host._providers.completion.splice(i, 1); } });
+
+    // Definition
+    const defEntry = { selector, provider: { provideDefinition: (doc, pos, token) => this.definition(doc.uri.toString(), pos) } };
+    host._providers.definition.push(defEntry);
+    this._disposables.push({ dispose: () => { const i = host._providers.definition.indexOf(defEntry); if (i >= 0) host._providers.definition.splice(i, 1); } });
+
+    // References
+    const refEntry = { selector, provider: { provideReferences: (doc, pos, ctx, token) => this.references(doc.uri.toString(), pos, ctx) } };
+    host._providers.references.push(refEntry);
+    this._disposables.push({ dispose: () => { const i = host._providers.references.indexOf(refEntry); if (i >= 0) host._providers.references.splice(i, 1); } });
+
+    // Signature Help
+    const sigEntry = { selector, provider: { provideSignatureHelp: (doc, pos, token, ctx) => this.signatureHelp(doc.uri.toString(), pos) } };
+    host._providers.signatureHelp.push(sigEntry);
+    this._disposables.push({ dispose: () => { const i = host._providers.signatureHelp.indexOf(sigEntry); if (i >= 0) host._providers.signatureHelp.splice(i, 1); } });
+
+    // Document Symbols
+    const symEntry = { selector, provider: { provideDocumentSymbols: (doc, token) => this.documentSymbols(doc.uri.toString()) } };
+    host._providers.documentSymbol.push(symEntry);
+    this._disposables.push({ dispose: () => { const i = host._providers.documentSymbol.indexOf(symEntry); if (i >= 0) host._providers.documentSymbol.splice(i, 1); } });
+
+    log(`[lsp] registered providers for: ${selector.join(', ')}`);
+    // Emit a capabilities update so the workbench re-registers its Monaco providers
+    host.emit('event', { type: 'extensionActivated', extensionId: '__lsp_python__' });
+  }
+
+  didOpen(uri, languageId, version, text) {
+    if (!this._initialized || !this._matchesSelector(languageId)) return;
+    this._notify('textDocument/didOpen', {
+      textDocument: { uri, languageId, version, text },
+    });
+  }
+
+  didChange(uri, version, text, languageId) {
+    if (!this._initialized) return;
+    const doc = this._host._textDocuments.get(uri);
+    const lang = languageId || (doc && doc.languageId) || '';
+    if (!this._matchesSelector(lang)) return;
+    this._notify('textDocument/didChange', {
+      textDocument: { uri, version },
+      contentChanges: [{ text }],
+    });
+  }
+
+  didClose(uri) {
+    if (!this._initialized) return;
+    const doc = this._host._textDocuments.get(uri);
+    if (!doc || !this._matchesSelector(doc.languageId)) return;
+    this._notify('textDocument/didClose', { textDocument: { uri } });
+  }
+
+  async hover(uri, position) {
+    if (!this._initialized) return null;
+    try {
+      const result = await this._request('textDocument/hover', {
+        textDocument: { uri },
+        position: { line: position.line ?? (position.lineNumber - 1), character: position.character ?? (position.column - 1) },
+      });
+      if (!result) return null;
+      const contents = Array.isArray(result.contents) ? result.contents
+        : typeof result.contents === 'string' ? [{ value: result.contents }]
+        : result.contents?.value != null ? [result.contents]
+        : [];
+      return { contents: contents.map(c => typeof c === 'string' ? { value: c } : { value: c.value || '' }), range: result.range };
+    } catch { return null; }
+  }
+
+  async completion(uri, position, context) {
+    if (!this._initialized) return null;
+    try {
+      const result = await this._request('textDocument/completion', {
+        textDocument: { uri },
+        position: { line: position.line ?? (position.lineNumber - 1), character: position.character ?? (position.column - 1) },
+        context: context ? { triggerKind: context.triggerKind, triggerCharacter: context.triggerCharacter } : undefined,
+      });
+      if (!result) return null;
+      const items = Array.isArray(result) ? result : (result.items || []);
+      return {
+        items: items.map(i => this._convertCompletionItem(i)),
+        isIncomplete: result.isIncomplete ?? false,
+      };
+    } catch { return null; }
+  }
+
+  _convertCompletionItem(item) {
+    // LSP CompletionItemKind → vscode CompletionItemKind (same numbering, 1-based)
+    return {
+      label: item.label,
+      kind: item.kind,
+      detail: item.detail,
+      documentation: item.documentation,
+      sortText: item.sortText,
+      filterText: item.filterText,
+      insertText: item.textEdit?.newText ?? item.insertText ?? item.label,
+      range: item.textEdit?.range,
+      additionalTextEdits: item.additionalTextEdits,
+    };
+  }
+
+  async definition(uri, position) {
+    if (!this._initialized) return null;
+    try {
+      const result = await this._request('textDocument/definition', {
+        textDocument: { uri },
+        position: { line: position.line ?? (position.lineNumber - 1), character: position.character ?? (position.column - 1) },
+      });
+      if (!result) return [];
+      return (Array.isArray(result) ? result : [result]).map(l => ({
+        uri: l.uri,
+        range: l.range,
+      }));
+    } catch { return []; }
+  }
+
+  async references(uri, position, context) {
+    if (!this._initialized) return null;
+    try {
+      const result = await this._request('textDocument/references', {
+        textDocument: { uri },
+        position: { line: position.line ?? (position.lineNumber - 1), character: position.character ?? (position.column - 1) },
+        context: { includeDeclaration: context?.includeDeclaration ?? false },
+      });
+      if (!Array.isArray(result)) return [];
+      return result.map(l => ({ uri: l.uri, range: l.range }));
+    } catch { return []; }
+  }
+
+  async signatureHelp(uri, position) {
+    if (!this._initialized) return null;
+    try {
+      const result = await this._request('textDocument/signatureHelp', {
+        textDocument: { uri },
+        position: { line: position.line ?? (position.lineNumber - 1), character: position.character ?? (position.column - 1) },
+      });
+      if (!result) return null;
+      return {
+        signatures: (result.signatures || []).map(s => ({
+          label: s.label,
+          documentation: s.documentation,
+          parameters: (s.parameters || []).map(p => ({ label: p.label, documentation: p.documentation })),
+        })),
+        activeSignature: result.activeSignature ?? 0,
+        activeParameter: result.activeParameter ?? 0,
+      };
+    } catch { return null; }
+  }
+
+  async documentSymbols(uri) {
+    if (!this._initialized) return null;
+    try {
+      const result = await this._request('textDocument/documentSymbol', { textDocument: { uri } });
+      if (!Array.isArray(result)) return [];
+      return result.map(s => this._convertSymbol(s));
+    } catch { return []; }
+  }
+
+  _convertSymbol(s) {
+    return {
+      name: s.name,
+      detail: s.detail || '',
+      kind: s.kind,
+      range: s.range || s.location?.range,
+      selectionRange: s.selectionRange || s.range || s.location?.range,
+      children: (s.children || []).map(c => this._convertSymbol(c)),
+    };
+  }
+
+  dispose() {
+    this._shutdown = true;
+    this._rejectAll('disposed');
+    this._disposables.forEach(d => d.dispose());
+    if (this._proc) {
+      try { this._proc.stdin.end(); } catch {}
+      setTimeout(() => { try { this._proc.kill(); } catch {} }, 1000);
+      this._proc = null;
+    }
+  }
+}
+
+// Start a Jedi LSP client for Python if the extension is installed.
+function tryStartJediLsp(host) {
+  const os = require('os');
+  const path = require('path');
+
+  // Find ms-python.python extension
+  const pythonExt = host._extensions.get('ms-python.python');
+  if (!pythonExt) {
+    log('[lsp] ms-python.python not installed, skipping Jedi LSP');
+    return;
+  }
+
+  const scriptPath = path.join(pythonExt.extensionPath, 'python_files', 'run-jedi-language-server.py');
+  if (!fs.existsSync(scriptPath)) {
+    log(`[lsp] Jedi launcher not found at ${scriptPath}`);
+    return;
+  }
+
+  // Resolve python interpreter
+  const interpreterCfg = host._configuration.get('python.defaultInterpreterPath');
+  const python = interpreterCfg && fs.existsSync(interpreterCfg) ? interpreterCfg : 'python3';
+
+  const client = new LspClient(host, ['python']);
+  host._lspClients = host._lspClients || new Map();
+  host._lspClients.set('python', client);
+
+  client.start(python, [scriptPath]).then(() => {
+    log('[lsp] Jedi language server ready');
+  }).catch(err => {
+    log(`[lsp] Jedi start failed: ${err.message}`);
+  });
+
+  // Wire document events to this LSP client
+  host.on('_lsp_didOpen', ({ uri, languageId, version, text }) => {
+    client.didOpen(uri, languageId, version, text);
+  });
+  host.on('_lsp_didChange', ({ uri, version, text, languageId }) => {
+    client.didChange(uri, version, text, languageId);
+  });
+  host.on('_lsp_didClose', ({ uri }) => {
+    client.didClose(uri);
+  });
+}
+
+// Patch ExtensionHost to emit LSP document events
+const _origOpen = ExtensionHost.prototype._handleDocumentOpened;
+ExtensionHost.prototype._handleDocumentOpened = function(id, params) {
+  const result = _origOpen.call(this, id, params);
+  this.emit('_lsp_didOpen', params);
+  return result;
+};
+const _origChange = ExtensionHost.prototype._handleDocumentChanged;
+ExtensionHost.prototype._handleDocumentChanged = function(id, params) {
+  const result = _origChange.call(this, id, params);
+  this.emit('_lsp_didChange', params);
+  return result;
+};
+const _origClose = ExtensionHost.prototype._handleDocumentClosed;
+ExtensionHost.prototype._handleDocumentClosed = function(id, params) {
+  const result = _origClose.call(this, id, params);
+  this.emit('_lsp_didClose', params);
+  return result;
+};
+
 const noopDisposable = { dispose() {} };
 const noopEvent = (_listener) => noopDisposable;
 
@@ -3239,9 +3693,23 @@ if (process.env.SIDEX_EXTENSION_HOST === 'true' && process.send) {
   const host = hostInstance;
   host.initialize();
 
+  // Baked-in defaults — extensions see these as user config unless overridden
+  const SIDEX_DEFAULT_CONFIG = {
+    'python.languageServer': 'Jedi',
+    'python.defaultInterpreterPath': '/usr/bin/python3',
+    'python.analysis.typeCheckingMode': 'basic',
+    'editor.formatOnSave': false,
+  };
+  for (const [k, v] of Object.entries(SIDEX_DEFAULT_CONFIG)) {
+    host._configuration.set(k, v);
+  }
+
   let initData = null;
   try {
-    if (process.env.SIDEX_INIT_DATA) {
+    if (process.env.SIDEX_INIT_DATA_FILE) {
+      initData = JSON.parse(fs.readFileSync(process.env.SIDEX_INIT_DATA_FILE, 'utf8'));
+      try { fs.unlinkSync(process.env.SIDEX_INIT_DATA_FILE); } catch {}
+    } else if (process.env.SIDEX_INIT_DATA) {
       initData = JSON.parse(process.env.SIDEX_INIT_DATA);
     }
   } catch (e) {
@@ -3294,6 +3762,9 @@ if (process.env.SIDEX_EXTENSION_HOST === 'true' && process.send) {
 
   process.send({ type: 'VSCODE_EXTHOST_IPC_READY' });
   log('extension host process running in IPC mode');
+
+  // Start Jedi LSP after extensions load (delay so extensions register first)
+  setTimeout(() => tryStartJediLsp(host), 3000);
 } else {
   module.exports = hostInstance;
 }

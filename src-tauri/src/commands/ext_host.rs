@@ -241,6 +241,12 @@ fn spawn_host_process(
     )
     .map_err(|e| format!("failed to encode search paths: {e}"))?;
 
+    // Write init data to a temp file to avoid hitting the kernel's ARG_MAX
+    // limit (~2MB on Linux) when the env var would be too large with many extensions.
+    let init_data_file = std::env::temp_dir().join(format!("sidex-init-{}.json", &session_id));
+    std::fs::write(&init_data_file, &init_data_json)
+        .map_err(|e| format!("failed to write init data file: {e}"))?;
+
     let mut child_cmd = Command::new(&runtime.path);
     child_cmd
         .arg("--max-old-space-size=3072")
@@ -249,7 +255,7 @@ fn spawn_host_process(
         .env("SIDEX_BUILTIN_EXTENSIONS_DIR", &builtin_ext_dir)
         .env("SIDEX_GLOBAL_STORAGE_DIR", &global_store_dir)
         .env("SIDEX_EXTENSION_SEARCH_PATHS", &search_paths_json)
-        .env("SIDEX_INIT_DATA", &init_data_json)
+        .env("SIDEX_INIT_DATA_FILE", &init_data_file)
         .env("SIDEX_SESSION_ID", &session_id)
         .env("NODE_ENV", "production")
         .stdin(Stdio::piped())

@@ -561,6 +561,7 @@ pub fn run() {
             commands::fetch_url,
             commands::fetch_url_text,
             commands::proxy_request,
+            commands::proxy_request_full,
             commands::debug_spawn_adapter,
             commands::debug_send,
             commands::debug_kill,

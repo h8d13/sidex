@@ -103,12 +103,18 @@ const GLOBAL_STORAGE_DIR = process.env.SIDEX_GLOBAL_STORAGE_DIR || path.join(USE
 
 let rustInitData = null;
 try {
-  if (process.env.SIDEX_INIT_DATA) {
+  if (process.env.SIDEX_INIT_DATA_FILE) {
+    const raw = require('fs').readFileSync(process.env.SIDEX_INIT_DATA_FILE, 'utf8');
+    rustInitData = JSON.parse(raw);
+    log(`received Rust-generated init data with ${(rustInitData.extensions || []).length} extensions`);
+    // Clean up temp file
+    try { require('fs').unlinkSync(process.env.SIDEX_INIT_DATA_FILE); } catch {}
+  } else if (process.env.SIDEX_INIT_DATA) {
     rustInitData = JSON.parse(process.env.SIDEX_INIT_DATA);
     log(`received Rust-generated init data with ${(rustInitData.extensions || []).length} extensions`);
   }
 } catch (e) {
-  log(`failed to parse SIDEX_INIT_DATA: ${e.message}`);
+  log(`failed to parse init data: ${e.message}`);
 }
 
 // ── Extension search paths (from Rust) ──────────────────────────────────
@@ -170,6 +176,16 @@ class ExtensionHostManager {
       return this._processes.get(reconnectionToken);
     }
 
+    // Write init data to a temp file to avoid ARG_MAX env limit with many extensions
+    const os = require('os');
+    const fs = require('fs');
+    const initDataFile = path.join(os.tmpdir(), `sidex-host-${reconnectionToken}.json`);
+    try {
+      fs.writeFileSync(initDataFile, JSON.stringify(initData));
+    } catch (e) {
+      log(`failed to write host init data file: ${e.message}`);
+    }
+
     const hostPath = path.join(__dirname, 'host.cjs');
     const child = cp.fork(hostPath, ['--type=extensionHost'], {
       silent: true,
@@ -177,7 +193,7 @@ class ExtensionHostManager {
         ...process.env,
         VSCODE_HANDLES_UNCAUGHT_ERRORS: 'true',
         SIDEX_EXTENSION_HOST: 'true',
-        SIDEX_INIT_DATA: JSON.stringify(initData),
+        SIDEX_INIT_DATA_FILE: initDataFile,
       },
     });
 

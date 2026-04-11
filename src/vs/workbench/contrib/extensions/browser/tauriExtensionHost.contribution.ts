@@ -70,6 +70,8 @@ import {
 	type IExtensionManifestSummary,
 } from './extensionPlatformClient.js';
 import { listen } from '@tauri-apps/api/event';
+import { IWorkbenchExtensionManagementService } from '../../../services/extensionManagement/common/extensionManagement.js';
+import type { IGalleryExtension } from '../../../../platform/extensionManagement/common/extensionManagement.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -157,9 +159,151 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 		@ILanguageConfigurationService private readonly langConfigService: ILanguageConfigurationService,
 		@IWorkspaceContextService private readonly workspaceContextService: IWorkspaceContextService,
 		@IStatusbarService private readonly statusbarService: IStatusbarService,
+		@IWorkbenchExtensionManagementService private readonly extensionManagementService: IWorkbenchExtensionManagementService,
 	) {
 		super();
+		this._initExtensionInstallBridge();
 		this._init();
+	}
+
+	// ── Extension Install Bridge ──────────────────────────────────────────────
+
+	private _pendingDiskInstalls: IGalleryExtension[] = [];
+	private _diskInstallTimer: ReturnType<typeof setTimeout> | undefined;
+	private _needsRebootAfterInstall = false;
+
+	private _initExtensionInstallBridge(): void {
+		this._register(this.extensionManagementService.onDidInstallExtensions(results => {
+			for (const result of results) {
+				if (!result.error && result.source && !('scheme' in result.source)) {
+					this._pendingDiskInstalls.push(result.source as IGalleryExtension);
+				}
+			}
+			if (this._pendingDiskInstalls.length > 0) {
+				this._scheduleDiskInstallFlush();
+			}
+		}));
+	}
+
+	private _scheduleDiskInstallFlush(): void {
+		if (this._diskInstallTimer) {
+			clearTimeout(this._diskInstallTimer);
+		}
+		// Wait 2s for all concurrent installs to queue up, then flush once
+		this._diskInstallTimer = setTimeout(() => {
+			this._diskInstallTimer = undefined;
+			const batch = this._pendingDiskInstalls.splice(0);
+			if (batch.length > 0) {
+				this._flushDiskInstalls(batch).catch(err => {
+					this.logService.warn(`[ExtHost] disk install batch failed: ${err}`);
+				});
+			}
+		}, 2000);
+	}
+
+	private async _flushDiskInstalls(batch: IGalleryExtension[]): Promise<void> {
+		const { invoke } = await import('@tauri-apps/api/core');
+
+		// Detect current platform for correct VSIX variant
+		const platform = this._getLinuxTargetPlatform();
+
+		for (const gallery of batch) {
+			try {
+				await this._installExtensionToDisc(gallery, platform, invoke);
+			} catch (err) {
+				this.logService.warn(`[ExtHost] disk install failed for ${gallery.identifier.id}: ${err}`);
+			}
+		}
+
+		// Single restart after entire batch
+		try {
+			this._needsRebootAfterInstall = true;
+			await invoke('extension_platform_restart');
+			this.logService.info(`[ExtHost] restarted after installing ${batch.map(g => g.identifier.id).join(', ')}`);
+		} catch (e) {
+			this.logService.warn(`[ExtHost] restart failed: ${e}`);
+		}
+	}
+
+	private _getLinuxTargetPlatform(): string {
+		const arch = navigator.userAgent.includes('x86_64') || navigator.userAgent.includes('Win64') ? 'x64' : 'arm64';
+		const platform = navigator.platform.toLowerCase();
+		if (platform.includes('linux')) { return `linux-${arch}`; }
+		if (platform.includes('win')) { return `win32-${arch}`; }
+		if (platform.includes('mac') || platform.includes('darwin')) { return `darwin-${arch}`; }
+		return 'universal';
+	}
+
+	private async _installExtensionToDisc(
+		gallery: IGalleryExtension,
+		platform: string,
+		invoke: (cmd: string, args?: Record<string, unknown>) => Promise<unknown>
+	): Promise<void> {
+		// Build download URL — prefer platform-specific VSIX, fall back to asset URI
+		const downloadUrl = this._buildDownloadUrl(gallery, platform);
+		this.logService.info(`[ExtHost] downloading ${gallery.identifier.id} from ${downloadUrl}`);
+
+		let result = await (invoke as (cmd: string, args: Record<string, unknown>) => Promise<{ status: number; headers: Record<string, string>; body_b64: string }>)('proxy_request_full', {
+			url: downloadUrl,
+			method: 'GET',
+			headers: {
+				'X-Market-Client-Id': 'VSCode 1.110.0',
+				'User-Agent': 'VSCode 1.110.0 (SideX)',
+			},
+			body: null,
+		});
+
+		// If platform-specific 404s, retry with universal
+		if (result.status === 404 && downloadUrl !== gallery.assets?.download?.uri) {
+			const fallback = gallery.assets?.download?.uri;
+			if (fallback) {
+				this.logService.info(`[ExtHost] 404 for ${platform}, retrying universal`);
+				result = await (invoke as (cmd: string, args: Record<string, unknown>) => Promise<{ status: number; headers: Record<string, string>; body_b64: string }>)('proxy_request_full', {
+					url: fallback,
+					method: 'GET',
+					headers: { 'X-Market-Client-Id': 'VSCode 1.110.0', 'User-Agent': 'VSCode 1.110.0 (SideX)' },
+					body: null,
+				});
+			}
+		}
+
+		if (result.status !== 200) {
+			throw new Error(`download returned HTTP ${result.status} for ${gallery.identifier.id}`);
+		}
+
+		const binaryStr = atob(result.body_b64);
+		const bytes: number[] = new Array(binaryStr.length);
+		for (let i = 0; i < binaryStr.length; i++) {
+			bytes[i] = binaryStr.charCodeAt(i);
+		}
+
+		const tmpPath = `/tmp/sidex-ext-${gallery.identifier.id.replace(/[^a-z0-9_-]/gi, '_')}-${gallery.version}.vsix`;
+		await (invoke as (cmd: string, args: Record<string, unknown>) => Promise<void>)('write_file_bytes', { path: tmpPath, content: bytes });
+
+		const installed = await (invoke as (cmd: string, args: Record<string, unknown>) => Promise<{ id: string; name: string; version: string; path: string }>)('install_extension', { vsixPath: tmpPath });
+		this.logService.info(`[ExtHost] installed ${installed.id} v${installed.version} to ${installed.path}`);
+	}
+
+	private _buildDownloadUrl(gallery: IGalleryExtension, platform: string): string {
+		// Try to rewrite open-vsx or marketplace URLs to request correct platform
+		const base = gallery.assets?.download?.uri ?? '';
+		if (!base) { return base; }
+
+		// open-vsx.org URL pattern: replace targetPlatform param
+		if (base.includes('open-vsx.org')) {
+			return base.replace(/targetPlatform=[^&]+/, `targetPlatform=${platform}`);
+		}
+
+		// marketplace.visualstudio.com vspackage URL: insert platform
+		if (base.includes('marketplace.visualstudio.com') && !base.includes('universal')) {
+			try {
+				const url = new URL(base);
+				url.searchParams.set('targetPlatform', platform);
+				return url.toString();
+			} catch { /* fall through */ }
+		}
+
+		return base;
 	}
 
 	// ── Lifecycle ───────────────────────────────────────────────────────────
@@ -340,10 +484,9 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 							return null;
 						}
 						const contents = result.contents.map((c: any) => {
-						let val = typeof c === 'string' ? c : String(c?.value ?? '');
-						val = val.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-					return { value: val };
-					});
+							const val = typeof c === 'string' ? c : String(c?.value ?? '');
+							return { value: val, isTrusted: true, supportThemeIcons: true, supportHtml: false };
+						});
 					const lspRange = result.range ? toVscRange(result.range) : undefined;
 						const wordRange = (() => {
 							const word = model.getWordAtPosition(position);
@@ -484,7 +627,20 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 	}
 
 	private _scheduleReconnect(): void {
-		if (this._reconnectTimer || !this._port || this._reconnectAttempts >= 3) {
+		if (this._reconnectTimer) {
+			return;
+		}
+		// If we triggered a restart for extension install, re-bootstrap to get new port
+		if (this._needsRebootAfterInstall) {
+			this._needsRebootAfterInstall = false;
+			this._reconnectTimer = setTimeout(() => {
+				this._reconnectTimer = undefined;
+				this._port = undefined;
+				this._init();
+			}, 2000);
+			return;
+		}
+		if (!this._port || this._reconnectAttempts >= 3) {
 			return;
 		}
 		this._reconnectAttempts++;
@@ -1160,7 +1316,12 @@ class TauriExtensionHostContribution extends Disposable implements IWorkbenchCon
 				return this._fallbackHover(model, position);
 			}
 			return {
-				contents: result.contents.map(c => ({ value: typeof c === 'string' ? c : String(c?.value ?? '') })),
+				contents: result.contents.map(c => ({
+					value: typeof c === 'string' ? c : String(c?.value ?? ''),
+					isTrusted: true,
+					supportThemeIcons: true,
+					supportHtml: false,
+				})),
 				range: result.range ? toVscRange(result.range) : undefined,
 			};
 		} catch (error) {
