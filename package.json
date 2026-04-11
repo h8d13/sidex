@@ -19,8 +19,6 @@
     "rust:fmt:fix": "cd src-tauri && cargo fmt --all"
   },
   "dependencies": {
-    "@microsoft/1ds-core-js": "^4.3.11",
-    "@microsoft/1ds-post-js": "^4.3.11",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-shell": "^2",
     "@tauri-apps/plugin-updater": "^2.10.1",
@@ -40,7 +38,6 @@
     "@xterm/addon-webgl": "^0.19.0",
     "@xterm/xterm": "^5.5.0",
     "monaco-editor": "^0.52.2",
-    "tas-client": "^0.3.2",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
