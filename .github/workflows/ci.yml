@@ -17,9 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ──────────────────────────────────────────────────────────────
-  # Type-check the TypeScript frontend
-  # ──────────────────────────────────────────────────────────────
+
   typecheck:
     runs-on: ubuntu-latest
     steps:
@@ -37,9 +35,7 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-  # ──────────────────────────────────────────────────────────────
-  # Lint Rust code
-  # ──────────────────────────────────────────────────────────────
+ 
   clippy:
     runs-on: ubuntu-latest
     steps:

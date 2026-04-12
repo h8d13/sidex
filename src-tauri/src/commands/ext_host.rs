@@ -3,13 +3,12 @@ use crate::commands::extension_platform::{
     resolve_builtin_extensions_dir, resolve_node_runtime, resolve_server_script, scan_extensions,
     user_extensions_dir, ExtensionHostInitData, ExtensionKind, ExtensionManifest, NodeRuntimeInfo,
 };
-use crate::commands::extension_wasm::WasmExtensionRuntime;
 use serde::{Deserialize, Serialize};
 use std::io::BufRead;
 use std::process::{Child, Command, Stdio};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::time::Instant;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::AppHandle;
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
