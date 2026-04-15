@@ -104,33 +104,33 @@ pub async fn git_status(path: String) -> Result<GitStatus, String> {
         .to_string();
 
     let changes = lines
-        .filter(|l| !l.is_empty())
+        .filter(|l| l.len() >= 4)
         .map(|line| {
-            let xy = &line[..2];
+            let bytes = line.as_bytes();
+            let x = bytes[0] as char;
+            let y = bytes[1] as char;
             let file_path = line[3..].trim().to_string();
-            let x = xy.chars().next().unwrap_or(' ');
-            let y = xy.chars().nth(1).unwrap_or(' ');
 
-            let (status, staged) = if x != ' ' && x != '?' {
-                (format!("{}", x), true)
+            let (status_char, staged) = if x != ' ' && x != '?' {
+                (x, true)
             } else {
-                (format!("{}", y), false)
+                (y, false)
             };
 
-            let status = match status.as_str() {
-                "M" => "modified".to_string(),
-                "A" => "added".to_string(),
-                "D" => "deleted".to_string(),
-                "R" => "renamed".to_string(),
-                "C" => "copied".to_string(),
-                "?" => "untracked".to_string(),
-                "!" => "ignored".to_string(),
-                other => other.to_string(),
+            let status = match status_char {
+                'M' => "modified",
+                'A' => "added",
+                'D' => "deleted",
+                'R' => "renamed",
+                'C' => "copied",
+                '?' => "untracked",
+                '!' => "ignored",
+                _ => "unknown",
             };
 
             GitChange {
                 path: file_path,
-                status,
+                status: status.to_string(),
                 staged,
             }
         })

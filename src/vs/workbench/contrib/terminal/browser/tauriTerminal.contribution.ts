@@ -144,18 +144,10 @@ class TauriTerminalContribution extends Disposable implements IWorkbenchContribu
 
 		const panel = document.createElement('div');
 		panel.className = 'tauri-terminal-panel';
-		Object.assign(panel.style, {
-			position: 'absolute',
-			bottom: '0',
-			left: '0',
-			right: '0',
-			height: '300px',
-			zIndex: '100',
-			display: 'flex',
-			flexDirection: 'column',
-			borderTop: '1px solid var(--vscode-panel-border, #444)',
-			backgroundColor: 'var(--vscode-panel-background, #1e1e1e)',
-		} satisfies Partial<CSSStyleDeclaration>);
+
+		const style = document.createElement('style');
+		style.textContent = `.tauri-terminal-panel{position:absolute;bottom:0;left:0;right:0;height:300px;z-index:100;display:flex;flex-direction:column;border-top:1px solid var(--vscode-panel-border,#444);background:var(--vscode-panel-background,#1e1e1e);contain:strict}`;
+		panel.appendChild(style);
 
 		// Header bar with title + close button
 		const header = document.createElement('div');
@@ -279,11 +271,19 @@ class TauriTerminalContribution extends Disposable implements IWorkbenchContribu
 		));
 
 		// Handle window/panel resize
+		let resizeRaf = 0;
 		const resizeObserver = new ResizeObserver(() => {
-			fitAddon.fit();
+			if (resizeRaf) { cancelAnimationFrame(resizeRaf); }
+			resizeRaf = requestAnimationFrame(() => {
+				fitAddon.fit();
+				resizeRaf = 0;
+			});
 		});
 		resizeObserver.observe(termContainer);
-		this._register(toDisposable(() => resizeObserver.disconnect()));
+		this._register(toDisposable(() => {
+			if (resizeRaf) { cancelAnimationFrame(resizeRaf); }
+			resizeObserver.disconnect();
+		}));
 
 		// Update theme on change
 		this._register(toDisposable(

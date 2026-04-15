@@ -6,6 +6,7 @@
 let wasmModule: any = null;
 let initPromise: Promise<void> | null = null;
 let initFailed = false;
+let outBuf: Float64Array | null = null;
 
 async function ensureWasm(): Promise<any> {
 	if (wasmModule) {
@@ -21,6 +22,8 @@ async function ensureWasm(): Promise<any> {
 				const mod = await import(/* @vite-ignore */ wasmPath);
 				await mod.default();
 				wasmModule = mod;
+				const ptr = mod.get_output_ptr();
+				outBuf = new Float64Array(mod.memory.buffer, ptr, 8);
 			} catch (e) {
 				console.warn('[SideX] WASM scroll module not available, using JS fallback', e);
 				initFailed = true;
@@ -31,7 +34,6 @@ async function ensureWasm(): Promise<any> {
 	return wasmModule;
 }
 
-// Pre-load WASM eagerly
 ensureWasm();
 
 export interface IWasmScrollState {
@@ -86,20 +88,18 @@ export function wasmValidateScrollState(
 	height: number, scrollHeight: number, scrollTop: number,
 	forceInt: boolean
 ): IWasmScrollState | null {
-	if (!wasmModule) {
+	if (!wasmModule || !outBuf) {
 		return null;
 	}
-	const result = wasmModule.validate_scroll_state(width, scrollWidth, scrollLeft, height, scrollHeight, scrollTop, forceInt);
-	const out: IWasmScrollState = {
-		width: result.width,
-		scrollWidth: result.scroll_width,
-		scrollLeft: result.scroll_left,
-		height: result.height,
-		scrollHeight: result.scroll_height,
-		scrollTop: result.scroll_top,
+	wasmModule.validate_scroll_state_flat(width, scrollWidth, scrollLeft, height, scrollHeight, scrollTop, forceInt);
+	return {
+		width: outBuf[0],
+		scrollWidth: outBuf[1],
+		scrollLeft: outBuf[2],
+		height: outBuf[3],
+		scrollHeight: outBuf[4],
+		scrollTop: outBuf[5],
 	};
-	result.free();
-	return out;
 }
 
 export function wasmSmoothScrollTick(
@@ -108,34 +108,30 @@ export function wasmSmoothScrollTick(
 	fromTop: number, toTop: number,
 	viewportWidth: number, viewportHeight: number
 ): IWasmSmoothScrollResult | null {
-	if (!wasmModule) {
+	if (!wasmModule || !outBuf) {
 		return null;
 	}
-	const result = wasmModule.smooth_scroll_tick(now, startTime, duration, fromLeft, toLeft, fromTop, toTop, viewportWidth, viewportHeight);
-	const out: IWasmSmoothScrollResult = {
-		scrollLeft: result.scroll_left,
-		scrollTop: result.scroll_top,
-		isDone: result.is_done,
+	wasmModule.smooth_scroll_tick_flat(now, startTime, duration, fromLeft, toLeft, fromTop, toTop, viewportWidth, viewportHeight);
+	return {
+		scrollLeft: outBuf[0],
+		scrollTop: outBuf[1],
+		isDone: outBuf[2] !== 0,
 	};
-	result.free();
-	return out;
 }
 
 export function wasmInertialTick(
 	speedX: number, speedY: number,
 	decay: number, threshold: number
 ): IWasmInertialState | null {
-	if (!wasmModule) {
+	if (!wasmModule || !outBuf) {
 		return null;
 	}
-	const result = wasmModule.inertial_tick(speedX, speedY, decay, threshold);
-	const out: IWasmInertialState = {
-		speedX: result.speed_x,
-		speedY: result.speed_y,
-		active: result.active,
+	wasmModule.inertial_tick_flat(speedX, speedY, decay, threshold);
+	return {
+		speedX: outBuf[0],
+		speedY: outBuf[1],
+		active: outBuf[2] !== 0,
 	};
-	result.free();
-	return out;
 }
 
 export function wasmComputeScrollbarState(
@@ -143,17 +139,15 @@ export function wasmComputeScrollbarState(
 	visibleSize: number, scrollSize: number, scrollPosition: number,
 	minSliderSize: number
 ): IWasmScrollbarValues | null {
-	if (!wasmModule) {
+	if (!wasmModule || !outBuf) {
 		return null;
 	}
-	const result = wasmModule.compute_scrollbar_state(arrowSize, scrollbarSize, oppositeScrollbarSize, visibleSize, scrollSize, scrollPosition, minSliderSize);
-	const out: IWasmScrollbarValues = {
-		sliderSize: result.slider_size,
-		sliderPosition: result.slider_position,
-		sliderRatio: result.slider_ratio,
+	wasmModule.compute_scrollbar_state_flat(arrowSize, scrollbarSize, oppositeScrollbarSize, visibleSize, scrollSize, scrollPosition, minSliderSize);
+	return {
+		sliderSize: outBuf[0],
+		sliderPosition: outBuf[1],
+		sliderRatio: outBuf[2],
 	};
-	result.free();
-	return out;
 }
 
 export function wasmProcessWheelDelta(
@@ -163,19 +157,17 @@ export function wasmProcessWheelDelta(
 	isShift: boolean, isAlt: boolean,
 	fastSensitivity: number, isMac: boolean
 ): IWasmWheelDelta | null {
-	if (!wasmModule) {
+	if (!wasmModule || !outBuf) {
 		return null;
 	}
-	const result = wasmModule.process_wheel_delta(
+	wasmModule.process_wheel_delta_flat(
 		rawDeltaX, rawDeltaY, sensitivity, scrollPredominantAxis,
 		flipAxes, scrollYToX, isShift, isAlt, fastSensitivity, isMac
 	);
-	const out: IWasmWheelDelta = {
-		deltaX: result.delta_x,
-		deltaY: result.delta_y,
+	return {
+		deltaX: outBuf[0],
+		deltaY: outBuf[1],
 	};
-	result.free();
-	return out;
 }
 
 let wasmClassifier: any = null;

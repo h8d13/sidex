@@ -153,11 +153,11 @@ pub fn ext_category(path: String) -> String {
 /// Check if file is binary (simple heuristic)
 #[tauri::command]
 pub fn is_binary_file(path: String) -> Result<bool, String> {
-    let content = std::fs::read(&path).map_err(|e| format!("Failed to read file: {}", e))?;
-
-    // Check for null bytes in first 8KB
-    let sample = &content[..content.len().min(8192)];
-    Ok(sample.contains(&0))
+    use std::io::Read;
+    let mut file = std::fs::File::open(&path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let mut buf = [0u8; 8192];
+    let n = file.read(&mut buf).map_err(|e| format!("Failed to read: {}", e))?;
+    Ok(buf[..n].contains(&0))
 }
 
 /// Get common parent directory of multiple paths

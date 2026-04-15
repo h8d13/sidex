@@ -188,62 +188,46 @@ impl InvertedIndex {
     fn index_file(&self, file_path: &Path, max_file_size: u64) -> Result<(), String> {
         let path_str = file_path.to_string_lossy().to_string();
 
-        // Skip if file is too large
         let metadata = fs::metadata(file_path).map_err(|e| e.to_string())?;
         if metadata.len() > max_file_size {
             return Ok(());
         }
 
-        // Check if binary file
-        if is_binary_file(file_path)? {
+        let content = fs::read(file_path).map_err(|e| e.to_string())?;
+
+        if content[..content.len().min(8192)].contains(&0) {
             return Ok(());
         }
 
-        // Remove existing index for this file if present
+        let text = match String::from_utf8(content) {
+            Ok(s) => s,
+            Err(_) => return Ok(()),
+        };
+
         self.remove_file(&path_str);
 
-        // Read file content
-        let content = fs::read_to_string(file_path).map_err(|e| e.to_string())?;
-
-        // Get or create file ID
         let file_id = self.get_or_create_file_id(&path_str);
-
-        // Track words in this file
         let mut file_words: HashSet<String> = HashSet::new();
 
         // Index each line
-        for (line_idx, line) in content.lines().enumerate() {
+        for (line_idx, line) in text.lines().enumerate() {
             for mat in self.word_regex.find_iter(line) {
                 let word = mat.as_str();
                 let column = mat.start();
-
-                // Normalize word for indexing
                 let normalized_word = word.to_lowercase();
 
-                // Add to word index
                 self.word_index
                     .entry(normalized_word.clone())
-                    .and_modify(|v| {
-                        v.push(WordLocation {
-                            file_id,
-                            line: line_idx + 1,
-                            column: column + 1,
-                        });
-                    })
-                    .or_insert_with(|| {
-                        vec![WordLocation {
-                            file_id,
-                            line: line_idx + 1,
-                            column: column + 1,
-                        }]
+                    .or_default()
+                    .push(WordLocation {
+                        file_id,
+                        line: line_idx + 1,
+                        column: column + 1,
                     });
 
-                // Add to trigram index
                 self.add_trigrams(&normalized_word);
-
                 file_words.insert(normalized_word);
 
-                // Update memory estimate
                 self.memory_estimate.fetch_add(
                     std::mem::size_of::<WordLocation>() + word.len(),
                     Ordering::Relaxed,

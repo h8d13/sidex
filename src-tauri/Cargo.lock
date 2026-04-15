@@ -5130,6 +5130,7 @@ dependencies = [
  "libc",
  "log",
  "md5",
+ "memchr",
  "notify",
  "open",
  "pathdiff",

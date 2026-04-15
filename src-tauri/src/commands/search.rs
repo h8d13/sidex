@@ -1,9 +1,11 @@
 use globset::{Glob, GlobSet, GlobSetBuilder};
+use memchr::memmem;
 use rayon::prelude::*;
 use regex::RegexBuilder;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, Serialize)]
@@ -42,7 +44,7 @@ pub struct SearchTextOptions {
 }
 
 const DEFAULT_MAX_RESULTS: usize = 500;
-const DEFAULT_MAX_FILE_SIZE: u64 = 5 * 1024 * 1024; // 5 MB
+const DEFAULT_MAX_FILE_SIZE: u64 = 5 * 1024 * 1024;
 
 static ALWAYS_SKIP: &[&str] = &[
     "node_modules",
@@ -80,25 +82,24 @@ fn should_skip(entry: &walkdir::DirEntry, include_hidden: bool) -> bool {
     false
 }
 
-fn fuzzy_score(pattern: &str, target: &str) -> Option<i64> {
+fn fuzzy_score(pattern: &[u8], target: &str) -> Option<i64> {
     if pattern.is_empty() {
         return Some(0);
     }
-    let pat: Vec<char> = pattern.chars().collect();
-    let tgt: Vec<char> = target.chars().collect();
+    let target_bytes = target.as_bytes();
     let mut pi = 0;
     let mut score: i64 = 0;
-    let mut prev_match = false;
     let mut consecutive = 0i64;
+    let mut prev_match = false;
 
-    for (ti, &tc) in tgt.iter().enumerate() {
-        if pi < pat.len() && tc.to_ascii_lowercase() == pat[pi].to_ascii_lowercase() {
+    for (ti, &tc) in target_bytes.iter().enumerate() {
+        if pi < pattern.len() && tc.to_ascii_lowercase() == pattern[pi].to_ascii_lowercase() {
             score += 1;
-            if ti == 0 || !tgt[ti - 1].is_alphanumeric() {
-                score += 5; // word boundary
+            if ti == 0 || !target_bytes[ti - 1].is_ascii_alphanumeric() {
+                score += 5;
             }
-            if tc == pat[pi] {
-                score += 1; // exact case
+            if tc == pattern[pi] {
+                score += 1;
             }
             if prev_match {
                 consecutive += 1;
@@ -114,8 +115,8 @@ fn fuzzy_score(pattern: &str, target: &str) -> Option<i64> {
         }
     }
 
-    if pi == pat.len() {
-        let len_penalty = (tgt.len() as i64 - pat.len() as i64).min(20);
+    if pi == pattern.len() {
+        let len_penalty = (target_bytes.len() as i64 - pattern.len() as i64).min(20);
         Some(score * 100 - len_penalty)
     } else {
         None
@@ -139,27 +140,14 @@ pub fn search_files(
     let include_set = options
         .as_ref()
         .and_then(|o| o.include.as_deref())
-        .and_then(|v| {
-            if v.is_empty() {
-                None
-            } else {
-                Some(build_globset(v))
-            }
-        })
-        .flatten();
+        .and_then(|v| if v.is_empty() { None } else { build_globset(v) });
     let exclude_set = options
         .as_ref()
         .and_then(|o| o.exclude.as_deref())
-        .and_then(|v| {
-            if v.is_empty() {
-                None
-            } else {
-                Some(build_globset(v))
-            }
-        })
-        .flatten();
+        .and_then(|v| if v.is_empty() { None } else { build_globset(v) });
 
-    let mut scored: Vec<FileMatch> = Vec::new();
+    let pattern_bytes = pattern.as_bytes().to_vec();
+    let mut scored: Vec<FileMatch> = Vec::with_capacity(max_results * 2);
 
     for entry in WalkDir::new(&root)
         .follow_links(false)
@@ -173,7 +161,6 @@ pub fn search_files(
         }
 
         let path = entry.path();
-        let name = entry.file_name().to_string_lossy().to_string();
 
         if let Some(ref inc) = include_set {
             if !inc.is_match(path) {
@@ -186,19 +173,20 @@ pub fn search_files(
             }
         }
 
-        let score = match fuzzy_score(&pattern, &name) {
+        let name = entry.file_name().to_string_lossy();
+        let score = match fuzzy_score(&pattern_bytes, &name) {
             Some(s) => s,
             None => continue,
         };
 
         scored.push(FileMatch {
-            path: path.to_string_lossy().to_string(),
-            name,
+            path: path.to_string_lossy().into_owned(),
+            name: name.into_owned(),
             score,
         });
     }
 
-    scored.sort_by(|a, b| b.score.cmp(&a.score));
+    scored.sort_unstable_by(|a, b| b.score.cmp(&a.score));
     scored.truncate(max_results);
     Ok(scored)
 }
@@ -229,25 +217,18 @@ pub fn search_text(
     let include_set = options
         .as_ref()
         .and_then(|o| o.include.as_deref())
-        .and_then(|v| {
-            if v.is_empty() {
-                None
-            } else {
-                Some(build_globset(v))
-            }
-        })
-        .flatten();
+        .and_then(|v| if v.is_empty() { None } else { build_globset(v) });
     let exclude_set = options
         .as_ref()
         .and_then(|o| o.exclude.as_deref())
-        .and_then(|v| {
-            if v.is_empty() {
-                None
-            } else {
-                Some(build_globset(v))
-            }
-        })
-        .flatten();
+        .and_then(|v| if v.is_empty() { None } else { build_globset(v) });
+
+    let use_literal = !is_regex && case_sensitive;
+    let literal_finder = if use_literal {
+        Some(Arc::new(memmem::Finder::new(query.as_bytes())))
+    } else {
+        None
+    };
 
     let pattern = if is_regex {
         query.clone()
@@ -255,10 +236,16 @@ pub fn search_text(
         regex::escape(&query)
     };
 
-    let re = RegexBuilder::new(&pattern)
-        .case_insensitive(!case_sensitive)
-        .build()
-        .map_err(|e| format!("Invalid search pattern: {e}"))?;
+    let re = if !use_literal {
+        Some(
+            RegexBuilder::new(&pattern)
+                .case_insensitive(!case_sensitive)
+                .build()
+                .map_err(|e| format!("Invalid search pattern: {e}"))?,
+        )
+    } else {
+        None
+    };
 
     let files: Vec<_> = WalkDir::new(&root)
         .follow_links(false)
@@ -288,48 +275,83 @@ pub fn search_text(
         })
         .collect();
 
-    let results = Arc::new(Mutex::new(Vec::<TextMatch>::new()));
+    let hit_count = Arc::new(AtomicUsize::new(0));
+    let done = Arc::new(AtomicBool::new(false));
 
-    files.par_iter().for_each(|entry| {
-        {
-            let r = results.lock().unwrap();
-            if r.len() >= max_results {
-                return;
+    let all_matches: Vec<Vec<TextMatch>> = files
+        .par_iter()
+        .filter_map(|entry| {
+            if done.load(Ordering::Relaxed) {
+                return None;
             }
-        }
 
-        let content = match fs::read_to_string(entry.path()) {
-            Ok(c) => c,
-            Err(_) => return,
-        };
+            let content = fs::read_to_string(entry.path()).ok()?;
+            let path_str = entry.path().to_string_lossy().into_owned();
+            let mut local = Vec::new();
 
-        let path_str = entry.path().to_string_lossy().to_string();
-        let mut local_matches = Vec::new();
-
-        for (line_idx, line) in content.lines().enumerate() {
-            for m in re.find_iter(line) {
-                local_matches.push(TextMatch {
-                    path: path_str.clone(),
-                    line_number: line_idx + 1,
-                    line_content: line.to_string(),
-                    column: m.start(),
-                    match_length: m.end() - m.start(),
-                });
-                if local_matches.len() >= max_results {
-                    break;
+            if let Some(ref finder) = literal_finder {
+                for (line_idx, line) in content.lines().enumerate() {
+                    let line_bytes = line.as_bytes();
+                    let mut start = 0;
+                    while let Some(pos) = finder.find(&line_bytes[start..]) {
+                        local.push(TextMatch {
+                            path: path_str.clone(),
+                            line_number: line_idx + 1,
+                            line_content: line.to_string(),
+                            column: start + pos,
+                            match_length: query.len(),
+                        });
+                        start += pos + 1;
+                        if hit_count.load(Ordering::Relaxed) + local.len() >= max_results {
+                            break;
+                        }
+                    }
+                    if hit_count.load(Ordering::Relaxed) + local.len() >= max_results {
+                        break;
+                    }
+                }
+            } else if let Some(ref re) = re {
+                for (line_idx, line) in content.lines().enumerate() {
+                    for m in re.find_iter(line) {
+                        local.push(TextMatch {
+                            path: path_str.clone(),
+                            line_number: line_idx + 1,
+                            line_content: line.to_string(),
+                            column: m.start(),
+                            match_length: m.end() - m.start(),
+                        });
+                        if hit_count.load(Ordering::Relaxed) + local.len() >= max_results {
+                            break;
+                        }
+                    }
+                    if hit_count.load(Ordering::Relaxed) + local.len() >= max_results {
+                        break;
+                    }
                 }
             }
-            if local_matches.len() >= max_results {
-                break;
+
+            if !local.is_empty() {
+                let prev = hit_count.fetch_add(local.len(), Ordering::Relaxed);
+                if prev + local.len() >= max_results {
+                    done.store(true, Ordering::Relaxed);
+                    local.truncate(max_results.saturating_sub(prev));
+                }
+                Some(local)
+            } else {
+                None
             }
-        }
+        })
+        .collect();
 
-        if !local_matches.is_empty() {
-            let mut r = results.lock().unwrap();
-            let remaining = max_results.saturating_sub(r.len());
-            r.extend(local_matches.into_iter().take(remaining));
+    let total: usize = all_matches.iter().map(|v| v.len()).sum();
+    let mut results = Vec::with_capacity(total.min(max_results));
+    for batch in all_matches {
+        let remaining = max_results.saturating_sub(results.len());
+        if remaining == 0 {
+            break;
         }
-    });
+        results.extend(batch.into_iter().take(remaining));
+    }
 
-    Ok(Arc::try_unwrap(results).unwrap().into_inner().unwrap())
+    Ok(results)
 }

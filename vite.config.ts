@@ -24,7 +24,8 @@ export default defineConfig({
     target: ['es2022', 'chrome100', 'safari15'],
     minify: 'esbuild',
     sourcemap: false,
-    chunkSizeWarningLimit: 25000,
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 5000,
     rollupOptions: {
       input: {
         index: path.resolve(__dirname, 'index.html'),
@@ -52,6 +53,17 @@ export default defineConfig({
             return `assets/${base}-[hash].js`;
           }
           return 'assets/[name]-[hash][extname]';
+        },
+        manualChunks(id) {
+          if (id.includes('/vs/editor/') && !id.includes('/workbench/')) {
+            return 'monaco';
+          }
+          if (id.includes('xterm') || id.includes('/terminal/')) {
+            return 'terminal';
+          }
+          if (id.includes('/vs/platform/')) {
+            return 'platform';
+          }
         },
       },
     },

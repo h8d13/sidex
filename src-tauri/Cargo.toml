@@ -59,6 +59,7 @@ globset = "0.4"
 dashmap = "6"
 rayon = "1.10"
 regex = "1"
+memchr = "2"
 
 # Process & terminal management
 crossbeam = "0.8"
@@ -97,7 +98,7 @@ todo = "warn"
 unimplemented = "warn"
 
 [profile.release]
-opt-level = "z"
+opt-level = 3
 lto = "thin"
 codegen-units = 1
 strip = true

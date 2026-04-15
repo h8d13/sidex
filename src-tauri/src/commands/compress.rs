@@ -147,11 +147,7 @@ pub fn zip_create(source_dir: String, zip_path: String) -> Result<(), String> {
                 .map_err(|e| format!("Failed to start file: {}", e))?;
 
             let mut f = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
-            let mut buffer = Vec::new();
-            f.read_to_end(&mut buffer)
-                .map_err(|e| format!("Failed to read file: {}", e))?;
-
-            zip.write_all(&buffer)
+            std::io::copy(&mut f, &mut zip)
                 .map_err(|e| format!("Failed to write to zip: {}", e))?;
         } else if !name.is_empty() {
             zip.add_directory(name, options)
